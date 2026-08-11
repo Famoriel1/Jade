@@ -15,3 +15,5 @@ bad_query can access the following paths:
 /var/mobile/Containers/Shared/AppGroup/* (Requires App Group sacrifice on iOS 26)
 /var/mobile/Containers/Shared/AppGroup (iOS 27)
 ```
+
+<sub>This might also work on iOS 18 but I haven't tested literally at all so ymmv</sub>

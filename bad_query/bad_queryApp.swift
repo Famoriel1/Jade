@@ -9,9 +9,18 @@ import SwiftUI
 
 @main
 struct bad_queryApp: App {
+    @StateObject private var state = AppState()
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            BQRootView()
+                .environmentObject(state)
+                .overlay {
+                    if state.show_respring {
+                        RespringView()
+                            .brightness(-1.0)
+                            .ignoresSafeArea()
+                    }
+                }
         }
     }
 }

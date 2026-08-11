@@ -1,0 +1,136 @@
+{
+  "features" : [
+    "refractivity",
+    "specular-location"
+  ],
+  "fill" : {
+    "linear-gradient" : [
+      "extended-srgb:0.00000,0.75294,0.90980,1.00000",
+      "srgb:0.52512,0.28604,0.91986,1.00000"
+    ]
+  },
+  "groups" : [
+    {
+      "blur-material-specializations" : [
+        {
+          "value" : 0.03
+        },
+        {
+          "appearance" : "tinted",
+          "value" : null
+        }
+      ],
+      "layers" : [
+        {
+          "blend-mode" : "normal",
+          "fill" : {
+            "linear-gradient" : [
+              "display-p3:0.24442,0.56870,1.05747,1.00000",
+              "srgb:0.51228,0.22658,1.00000,1.00000"
+            ],
+            "orientation" : {
+              "start" : {
+                "x" : 0.5,
+                "y" : 0
+              },
+              "stop" : {
+                "x" : 0.5,
+                "y" : 0.9119620192307692
+              }
+            }
+          },
+          "glass" : true,
+          "image-name" : "造型4.svg",
+          "name" : "造型4",
+          "opacity" : 1,
+          "position" : {
+            "scale" : 12,
+            "translation-in-points" : [
+              316,
+              2
+            ]
+          }
+        }
+      ],
+      "lighting" : "individual",
+      "opacity" : 0.8,
+      "refractivity" : {
+        "depth" : 0,
+        "enabled" : true,
+        "strength" : 0.569296875
+      },
+      "shadow" : {
+        "kind" : "layer-color",
+        "opacity" : 0.7
+      },
+      "specular" : "outside",
+      "translucency" : {
+        "enabled" : true,
+        "value" : 0.6
+      }
+    },
+    {
+      "layers" : [
+
+      ],
+      "shadow" : {
+        "kind" : "neutral",
+        "opacity" : 0.6
+      },
+      "translucency" : {
+        "enabled" : true,
+        "value" : 0.2
+      }
+    },
+    {
+      "blur-material" : null,
+      "layers" : [
+        {
+          "image-name" : "造型3.svg",
+          "name" : "造型3",
+          "position" : {
+            "scale" : 12,
+            "translation-in-points" : [
+              0,
+              0
+            ]
+          }
+        }
+      ],
+      "lighting" : "individual",
+      "opacity" : 0.7,
+      "refractivity" : {
+        "depth" : 0,
+        "enabled" : true,
+        "strength" : 0.6522265625
+      },
+      "shadow" : {
+        "kind" : "neutral",
+        "opacity" : 0.6
+      },
+      "translucency" : {
+        "enabled" : true,
+        "value" : 0.2
+      }
+    },
+    {
+      "layers" : [
+
+      ],
+      "shadow" : {
+        "kind" : "neutral",
+        "opacity" : 0.6
+      },
+      "translucency" : {
+        "enabled" : true,
+        "value" : 0.2
+      }
+    }
+  ],
+  "supported-platforms" : {
+    "circles" : [
+      "watchOS"
+    ],
+    "squares" : "shared"
+  }
+}
