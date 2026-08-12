@@ -13,6 +13,7 @@
 
 int64_t bad_query(char* path, bool create, char *group_identifier, bool is_group);
 char *bad_query_list(char *path, int64_t max_inode);
+char *bad_query_list_range(char *path, int64_t start_inode, int64_t end_inode);
 void bad_query_release(int64_t handle);
 
 // MHA route: resolve an app's data container by bundle ID (class 2), activate

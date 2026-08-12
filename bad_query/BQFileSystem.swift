@@ -343,7 +343,7 @@ final class BQFileSystemModel {
         }.value
 
         isScanning = false
-        guard let found else {
+        guard let found, !found.isEmpty else {
             lastError = "Inode scan failed: statfs refused for this path."
             statusMessage = "Inode scan failed"
             return
@@ -351,9 +351,6 @@ final class BQFileSystemModel {
         items = found
             .map { makeItem(parent: path, name: lastComponent($0), fullPath: $0) }
             .sorted(by: Self.itemOrder)
-        if items.isEmpty {
-            lastError = "No children found. Try a higher max inode."
-        }
         statusMessage = "\(items.count) items (inode scan)"
         await resolveContainerMetadata(for: path)
     }
@@ -382,14 +379,17 @@ final class BQFileSystemModel {
         guard Self.containerRoots.contains(parent) else { return }
         let paths = items.map(\.path)
         guard !paths.isEmpty else { return }
-        // Ensure sandbox extension for each container directory AND its metadata
-        // plist file — bad_query extensions don't recursively cover files within
-        // a directory, so we need a separate extension for the file path.
+
+        // Ensure sandbox extensions on the main actor (ensureExtension is
+        // @MainActor-isolated). Each container needs its own extension for
+        // the metadata plist file.
         for p in paths {
             ensureExtension(for: p, allowMHA: false)
             ensureExtension(for: p + "/.com.apple.mobile_container_manager.metadata.plist", allowMHA: false)
         }
-        let resolved = await Task.detached(priority: .utility) {
+
+        // Read and parse metadata plists concurrently in the background.
+        let resolved = await Task.detached(priority: .userInitiated) {
             var results: [ResolvedMeta] = []
             for containerPath in paths {
                 let metaPath = containerPath + "/.com.apple.mobile_container_manager.metadata.plist"
