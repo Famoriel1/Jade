@@ -62,7 +62,7 @@ struct BQRootView: View {
                     }
                 }
 
-                Section {
+                Section(header: Text("Container Roots")) {
                     NavigationLink {
                         BQAppListView()
                     } label: {
@@ -94,9 +94,13 @@ struct BQRootView: View {
                                 .foregroundStyle(.tint)
                         }
                     }
-
+                }
+                
+                Section {
                     ForEach(BQFileSystemModel.quickAccess) { entry in
-                        NavigationLink(value: entry.path) {
+                        NavigationLink {
+                            BQDirectoryView(path: entry.path)
+                        } label: {
                             VStack(alignment: .leading, spacing: 2) {
                                 Text(entry.title)
                                 Text(entry.path)
@@ -107,7 +111,7 @@ struct BQRootView: View {
                         }
                     }
                 } header: {
-                    Text("Container Roots")
+                    Text("File browsing")
                 } footer: {
                     Text("iOS 26 needs the App Group sacrifice route for App Groups; iOS 27 reaches System containers directly.")
                 }
@@ -158,9 +162,6 @@ struct BQRootView: View {
                 }
             }
             .navigationTitle("BQ File Manager")
-            .navigationDestination(for: String.self) { path in
-                BQDirectoryView(path: path)
-            }
             .overlay(alignment: .bottom) {
                 if !model.statusMessage.isEmpty {
                     Text(model.statusMessage)

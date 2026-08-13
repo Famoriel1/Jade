@@ -206,6 +206,11 @@ final class BQFileSystemModel {
             return mhaHandle
         }
 
+        // bad_query's path-traversal extension is per-path (not recursive).
+        // Cache by the full path, but skip re-activating if the container root
+        // already has an extension — the per-file extension is still needed for
+        // actual file access, but we avoid redundant syscalls for paths we've
+        // already activated.
         if let existing = activeExtensions[path] { return existing }
         var cPath = path.utf8CString.map { Int8($0) }
         var handle = bad_query(&cPath, true, nil, false)
@@ -279,17 +284,17 @@ final class BQFileSystemModel {
     }
 
     func releaseAllExtensions() {
-        for (path, handle) in activeExtensions {
+        let count = activeExtensions.count + mhaExtensions.values.filter { $0 > 0 }.count
+        for (_, handle) in activeExtensions {
             bad_query_release(handle)
-            appendLog("released extension \(handle) (\(path))")
         }
         activeExtensions.removeAll()
 
-        for (root, handle) in mhaExtensions where handle > 0 {
+        for (_, handle) in mhaExtensions where handle > 0 {
             bad_query_mha_release(handle)
-            appendLog("released MHA extension \(handle) (\(root))")
         }
         mhaExtensions.removeAll()
+        appendLog("released \(count) extension(s)")
         statusMessage = "All sandbox extensions released"
     }
 
@@ -380,15 +385,14 @@ final class BQFileSystemModel {
         let paths = items.map(\.path)
         guard !paths.isEmpty else { return }
 
-        // Ensure sandbox extensions on the main actor (ensureExtension is
-        // @MainActor-isolated). Each container needs its own extension for
-        // the metadata plist file.
+        // Each metadata plist needs its own extension (bad_query extensions are
+        // per-path, not recursive). Activate them on the main actor, then parse
+        // in the background.
         for p in paths {
-            ensureExtension(for: p, allowMHA: false)
             ensureExtension(for: p + "/.com.apple.mobile_container_manager.metadata.plist", allowMHA: false)
         }
 
-        // Read and parse metadata plists concurrently in the background.
+        // Read and parse metadata plists in the background.
         let resolved = await Task.detached(priority: .userInitiated) {
             var results: [ResolvedMeta] = []
             for containerPath in paths {
