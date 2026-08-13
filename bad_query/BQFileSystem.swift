@@ -127,6 +127,12 @@ private struct ListingOutcome: Sendable {
     let error: String?
 }
 
+/// Result of activating a single bad_query extension off the main thread.
+private struct ExtensionActivation: Sendable {
+    let path: String
+    let handle: Int64
+}
+
 @MainActor
 @Observable
 final class BQFileSystemModel {
@@ -159,7 +165,48 @@ final class BQFileSystemModel {
     }
 
     /// App Group owned by this app, used as the "sacrifice" route on iOS 26.
-    static let appGroupIdentifier = "group.com.jason.bqtools"
+    nonisolated static let appGroupIdentifier = "group.com.jason.bqtools"
+
+    /// Call bad_query directly without touching main-actor state. bad_query is a
+    /// stateless C function (dlopen + XPC + Mach IPC), safe to call concurrently
+    /// from background tasks — the same way inodeScan already calls
+    /// bad_query_list_range concurrently.
+    nonisolated static func rawBadQuery(path: String) -> Int64 {
+        var cPath = path.utf8CString.map { Int8($0) }
+        var handle = bad_query(&cPath, true, nil, false)
+        if handle < 0 {
+            var cGroup = appGroupIdentifier.utf8CString.map { Int8($0) }
+            var fallback = bad_query(&cPath, true, &cGroup, true)
+            if fallback < 0 {
+                fallback = bad_query(&cPath, true, &cGroup, false)
+            }
+            if fallback > 0 { handle = fallback }
+        }
+        return handle
+    }
+
+    /// Determine a reasonable max inode for automatic inode-scan fallbacks on
+    /// subdirectories. Uses statfs to avoid scanning beyond the filesystem's
+    /// actual inode capacity; falls back to 300k if statfs is unavailable or
+    /// reports an absurdly large value (APFS can report billions).
+    nonisolated static func autoScanMaxInode(path: String) -> Int64 {
+        var sfs = statfs()
+        guard path.withCString({ statfs($0, &sfs) }) == 0 else { return 300_000 }
+        let files = Int64(sfs.f_files)
+        if files > 0 && files < 300_000 { return files }
+        return 300_000
+    }
+
+    /// Per-container-root inode scan ceiling. Application needs 1.5M because
+    /// app UUID directories are spread across a wide inode range (e.g. WeChat).
+    /// Other container roots have fewer entries in a narrower range, so 300k
+    /// is sufficient and avoids wasting time on 1.2M extra fsgetpath misses.
+    /// Non-container paths use statfs-capped autoScanMaxInode.
+    static func defaultMaxInode(for path: String) -> Int64 {
+        if path == "/var/mobile/Containers/Data/Application" { return 1_500_000 }
+        if Self.containerRoots.contains(path) { return 300_000 }
+        return autoScanMaxInode(path: path)
+    }
 
     struct QuickAccess: Identifiable {
         var id: String { path }
@@ -194,6 +241,8 @@ final class BQFileSystemModel {
         "/var/mobile/Containers/Data/InternalDaemon",
         "/var/mobile/Containers/Data/PluginKitPlugin",
         "/var/mobile/Containers/Shared/AppGroup",
+        "/var/containers/Data/System",
+        "/var/containers/Shared/SystemGroup",
     ]
 
     private static let logFormatter: DateFormatter = {
@@ -210,7 +259,7 @@ final class BQFileSystemModel {
     // MARK: Sandbox extensions
 
     @discardableResult
-    func ensureExtension(for path: String, allowMHA: Bool = true) -> Int64 {
+    func ensureExtension(for path: String, allowMHA: Bool = true, force: Bool = false) -> Int64 {
         // Try MHA route first when enabled (and not opted out by caller)
         if allowMHA, useMHAHelper, let mhaHandle = ensureMHAExtension(for: path) {
             return mhaHandle
@@ -221,7 +270,10 @@ final class BQFileSystemModel {
         // already has an extension — the per-file extension is still needed for
         // actual file access, but we avoid redundant syscalls for paths we've
         // already activated.
-        if let existing = activeExtensions[path] { return existing }
+        // Use force=true to bypass cache (e.g. after creating a directory that
+        // didn't exist when the extension was first activated).
+        if !force, let existing = activeExtensions[path] { return existing }
+        if force { activeExtensions.removeValue(forKey: path) }
         var cPath = path.utf8CString.map { Int8($0) }
         var handle = bad_query(&cPath, true, nil, false)
         var route = "system"
@@ -304,21 +356,51 @@ final class BQFileSystemModel {
             bad_query_mha_release(handle)
         }
         mhaExtensions.removeAll()
+        // Clear scan caches so the next visit does a fresh scan (user explicitly
+        // released everything, likely to pick up newly installed apps).
+        inodeScanCache.removeAll()
+        inodeRangeCache.removeAll()
+        containerBundleCache.removeAll()
         appendLog("released \(count) extension(s)")
         statusMessage = "All sandbox extensions released"
     }
 
-    // MARK: Listing
-
-    func load(_ path: String, allowMHA: Bool = true) {
-        Task { await performLoad(path, allowMHA: allowMHA) }
+    /// Release only the metadata-plist extensions activated by
+    /// resolveContainerMetadata. These are only needed when browsing a
+    /// container root (to show app bundle IDs); deeper directories don't
+    /// need them, and each active extension slows down kernel syscalls.
+    func releaseMetadataExtensions() {
+        let suffix = ".com.apple.mobile_container_manager.metadata.plist"
+        let toRelease = activeExtensions.filter { $0.key.hasSuffix(suffix) }
+        guard !toRelease.isEmpty else { return }
+        for (key, handle) in toRelease {
+            activeExtensions.removeValue(forKey: key)
+            bad_query_release(handle)
+        }
+        containerBundleCache.removeAll()
+        appendLog("released \(toRelease.count) metadata extensions")
     }
 
-    func performLoad(_ path: String, allowMHA: Bool = true) async {
+    // MARK: Listing
+
+    func load(_ path: String, allowMHA: Bool = true, scanMaxInode: Int64? = nil) {
+        Task { await performLoad(path, allowMHA: allowMHA, scanMaxInode: scanMaxInode) }
+    }
+
+    func performLoad(_ path: String, allowMHA: Bool = true, scanMaxInode: Int64? = nil) async {
         isLoading = true
         lastError = nil
         usedInodeScan = false
         items = []
+
+        // When entering a non-container-root directory, release the metadata
+        // plist extensions that resolveContainerMetadata activated for the
+        // Apps list. Each active sandbox extension adds kernel auditing
+        // overhead to every syscall — 200+ metadata extensions can slow
+        // fsgetpath by ~20×, turning a 0.2s inode scan into a 4s one.
+        if !Self.containerRoots.contains(path) {
+            releaseMetadataExtensions()
+        }
 
         let handle = ensureExtension(for: path, allowMHA: allowMHA)
 
@@ -344,31 +426,162 @@ final class BQFileSystemModel {
                 ? "directory not readable"
                 : (BQError.extensionFailed(handle).errorDescription ?? "unknown")
             statusMessage = "Listing failed (\(reason)) — trying inode scan"
-            await inodeScan(path, maxInode: maxInode)
+            // Each container root has its own appropriate inode ceiling.
+            // Application needs 1.5M (many apps with high-inode UUIDs);
+            // other container roots use a smaller default. Subdirectories
+            // use statfs-capped autoScanMaxInode.
+            let scanMax = scanMaxInode ?? Self.defaultMaxInode(for: path)
+            await inodeScan(path, maxInode: scanMax)
         }
         isLoading = false
     }
 
+    /// Cache of container-root inode scan results: path → discovered subpaths.
+    /// containerRoots contents change infrequently (only on app install/uninstall),
+    /// so caching avoids re-scanning 1.5M inodes on every visit.
+    private var inodeScanCache: [String: [String]] = [:]
+
+    /// Discovered inode range per container root: path → (minInode, maxInode).
+    /// Used for adaptive rescans — only probe the known range ± a margin instead
+    /// of re-scanning the full [1, maxInode] range.
+    private var inodeRangeCache: [String: (min: Int64, max: Int64)] = [:]
+
     func inodeScan(_ path: String, maxInode: Int64) async {
-        self.maxInode = maxInode
         isScanning = true
         usedInodeScan = true
-        appendLog("inode scan of \(path) (max inode \(maxInode))…") 
+        let isContainerRoot = Self.containerRoots.contains(path)
 
-        // Split the [1, maxInode] range into parallel chunks. fsgetpath is a
-        // stateless syscall, so concurrent bad_query_list_range calls are safe
-        // and the bottleneck (serial fsgetpath probes) becomes parallel.
-        let chunkSize: Int64 = 8192
-        let chunks: [(Int64, Int64)] = stride(from: Int64(1), through: maxInode, by: Int(chunkSize)).map {
-            start in (start, min(start + chunkSize - 1, maxInode))
+        // Fast path: use cached scan results if available. containerRoots
+        // contents change infrequently (only on app install/uninstall), so
+        // we can skip the 1.5M-inode probe entirely on subsequent visits.
+        if let cached = inodeScanCache[path], !cached.isEmpty {
+            appendLog("inode scan cache hit for \(path) (\(cached.count) paths)")
+            let items = await Task.detached(priority: .userInitiated) {
+                Self.statItems(paths: cached)
+            }.value
+            self.items = items.sorted(by: Self.itemOrder)
+            isScanning = false
+            statusMessage = "\(items.count) items (cached)"
+            if isContainerRoot {
+                await resolveContainerMetadata(for: path)
+            }
+            return
         }
 
+        appendLog("inode scan of \(path) (max inode \(maxInode))…")
+
+        // Adaptive scan: if we have a previously-discovered inode range,
+        // scan that range ± a 50k margin first. This covers newly
+        // installed/uninstalled apps without re-probing 1.5M inodes.
+        // If the adaptive scan finds results, skip the full scan.
+        if let range = inodeRangeCache[path] {
+            let margin: Int64 = 50_000
+            let adaptStart = max(1, range.min - margin)
+            let adaptEnd = min(maxInode, range.max + margin)
+            appendLog("adaptive scan [\(adaptStart), \(adaptEnd)]…")
+            let adaptPaths = await scanInodeRange(path: path, start: adaptStart, end: adaptEnd)
+
+            if !adaptPaths.isEmpty {
+                // Adaptive scan found results — use them directly.
+                inodeScanCache[path] = adaptPaths
+                let items = await Task.detached(priority: .userInitiated) {
+                    Self.statItems(paths: adaptPaths)
+                }.value
+                self.items = items.sorted(by: Self.itemOrder)
+                isScanning = false
+                statusMessage = "\(items.count) items (adaptive scan)"
+                if isContainerRoot {
+                    await resolveContainerMetadata(for: path)
+                }
+                return
+            }
+        }
+
+        // Full scan: no cache, no adaptive range. Split into two phases so
+        // partial results appear quickly.
+        let quickMax: Int64 = min(10_000, maxInode)
+        let quickPaths = await scanInodeRange(path: path, start: 1, end: quickMax)
+
+        if !quickPaths.isEmpty {
+            let quickItems = await Task.detached(priority: .userInitiated) {
+                Self.statItems(paths: quickPaths)
+            }.value
+            self.items = quickItems.sorted(by: Self.itemOrder)
+            statusMessage = "\(items.count) items (scanning more…)"
+            if isContainerRoot {
+                await resolveContainerMetadata(for: path)
+            }
+        }
+
+        let restPaths = maxInode > quickMax
+            ? await scanInodeRange(path: path, start: quickMax + 1, end: maxInode)
+            : []
+
+        isScanning = false
+
+        let allPaths = quickPaths + restPaths
+        guard !allPaths.isEmpty else {
+            lastError = "Inode scan failed: statfs refused for this path."
+            statusMessage = "Inode scan failed"
+            return
+        }
+
+        // Record the discovered inode range for future adaptive scans.
+        // Done off the main actor — lstat on 200+ paths would block the UI.
+        if isContainerRoot {
+            let range = await Task.detached(priority: .userInitiated) { () -> (min: Int64, max: Int64)? in
+                var minInode: Int64 = .max
+                var maxInode: Int64 = 0
+                for p in allPaths {
+                    var st = stat()
+                    if p.withCString({ lstat($0, &st) }) == 0 {
+                        let ino = Int64(st.st_ino)
+                        if ino < minInode { minInode = ino }
+                        if ino > maxInode { maxInode = ino }
+                    }
+                }
+                guard minInode <= maxInode else { return nil }
+                return (min: minInode, max: maxInode)
+            }.value
+            if let range {
+                inodeRangeCache[path] = range
+                appendLog("recorded inode range [\(range.min), \(range.max)] for \(path)")
+            }
+            inodeScanCache[path] = allPaths
+        }
+
+        if !restPaths.isEmpty {
+            let allItems = await Task.detached(priority: .userInitiated) {
+                Self.statItems(paths: allPaths)
+            }.value
+            guard !allItems.isEmpty else {
+                self.items = []
+                statusMessage = "0 items (inode scan)"
+                return
+            }
+            self.items = allItems.sorted(by: Self.itemOrder)
+        }
+
+        statusMessage = "\(items.count) items (inode scan)"
+        if isContainerRoot {
+            await resolveContainerMetadata(for: path)
+        }
+    }
+
+    /// Scan a subrange of inodes [start, end] in parallel chunks. fsgetpath is
+    /// a stateless syscall, so concurrent bad_query_list_range calls are safe.
+    private func scanInodeRange(path: String, start: Int64, end: Int64) async -> [String] {
+        if start > end { return [] }
+        let chunkSize: Int64 = 8192
+        let chunks: [(Int64, Int64)] = stride(from: start, through: end, by: Int(chunkSize)).map {
+            s in (s, min(s + chunkSize - 1, end))
+        }
         let pathCopy = path
-        let allPaths: [String] = await withTaskGroup(of: [String]?.self) { group in
-            for (start, end) in chunks {
+        return await withTaskGroup(of: [String]?.self) { group in
+            for (s, e) in chunks {
                 group.addTask {
                     var cPath = pathCopy.utf8CString.map { Int8($0) }
-                    guard let raw = bad_query_list_range(&cPath, start, end) else {
+                    guard let raw = bad_query_list_range(&cPath, s, e) else {
                         return nil
                     }
                     defer { free(raw) }
@@ -381,27 +594,6 @@ final class BQFileSystemModel {
             }
             return merged
         }
-
-        isScanning = false
-        guard !allPaths.isEmpty else {
-            lastError = "Inode scan failed: statfs refused for this path."
-            statusMessage = "Inode scan failed"
-            return
-        }
-
-        // Stat the discovered paths in parallel (large batches use
-        // concurrentPerform inside statItems).
-        let items = await Task.detached(priority: .userInitiated) {
-            Self.statItems(paths: allPaths)
-        }.value
-
-        guard !items.isEmpty else {
-            statusMessage = "0 items (inode scan)"
-            return
-        }
-        self.items = items.sorted(by: Self.itemOrder)
-        statusMessage = "\(items.count) items (inode scan)"
-        await resolveContainerMetadata(for: path)
     }
 
     private static func itemOrder(_ lhs: FSItem, _ rhs: FSItem) -> Bool {
@@ -445,23 +637,65 @@ final class BQFileSystemModel {
         return item
     }
 
+    /// Cache of container path → bundle ID, so we don't re-read metadata plists
+    /// when items are rebuilt (e.g. Phase 2 of inodeScan replaces self.items).
+    private var containerBundleCache: [String: String] = [:]
+
     private func resolveContainerMetadata(for parent: String) async {
         guard Self.containerRoots.contains(parent) else { return }
         let paths = items.map(\.path)
         guard !paths.isEmpty else { return }
 
         // Each metadata plist needs its own extension (bad_query extensions are
-        // per-path, not recursive). Activate them on the main actor, then parse
-        // concurrently.
-        for p in paths {
-            ensureExtension(for: p + "/.com.apple.mobile_container_manager.metadata.plist", allowMHA: false)
+        // per-path, not recursive). Activate them concurrently off the main
+        // thread — each bad_query call is an expensive syscall (dlopen + XPC +
+        // Mach IPC), and running them serially on the main actor blocks the UI
+        // with 200+ app containers.
+        let metaPaths = paths.map { $0 + "/.com.apple.mobile_container_manager.metadata.plist" }
+        let uncached = metaPaths.filter { activeExtensions[$0] == nil }
+        if !uncached.isEmpty {
+            let handles: [ExtensionActivation] = await withTaskGroup(of: ExtensionActivation.self) { group in
+                for mp in uncached {
+                    group.addTask { ExtensionActivation(path: mp, handle: Self.rawBadQuery(path: mp)) }
+                }
+                var results: [ExtensionActivation] = []
+                for await result in group { results.append(result) }
+                return results
+            }
+            var activated = 0
+            for entry in handles where entry.handle > 0 {
+                activeExtensions[entry.path] = entry.handle
+                activated += 1
+            }
+            if activated > 0 { appendLog("activated \(activated) metadata extensions") }
         }
 
-        // Read and parse each metadata plist concurrently — each one is an
-        // independent file read + plist decode, so a task group parallelises
-        // them effectively.
-        let resolved: [ResolvedMeta] = await withTaskGroup(of: ResolvedMeta?.self) { group in
-            for containerPath in paths {
+        // Apply cached bundle IDs immediately (no I/O), then only read plists
+        // for containers we haven't resolved yet.
+        var resolved = 0
+        var toResolve: [String] = []
+        for containerPath in paths {
+            if let id = containerBundleCache[containerPath] {
+                if let index = items.firstIndex(where: { $0.path == containerPath }) {
+                    items[index].subtitle = id
+                }
+                resolved += 1
+            } else {
+                toResolve.append(containerPath)
+            }
+        }
+
+        guard !toResolve.isEmpty else {
+            if resolved > 0 { appendLog("resolved \(resolved) container identifiers (cached)") }
+            return
+        }
+
+        // Read and parse each uncached metadata plist concurrently, updating
+        // the UI progressively — each resolved identifier is written to its
+        // item and cache immediately as it completes, so bundle IDs appear
+        // one by one instead of all-at-once after a long wait.
+        await withTaskGroup(of: ResolvedMeta?.self) { group in
+            for containerPath in toResolve {
                 group.addTask {
                     let metaPath = containerPath + "/.com.apple.mobile_container_manager.metadata.plist"
                     guard let data = FileManager.default.contents(atPath: metaPath),
@@ -471,20 +705,17 @@ final class BQFileSystemModel {
                     return ResolvedMeta(path: containerPath, identifier: identifier)
                 }
             }
-            var results: [ResolvedMeta] = []
             for await result in group {
-                if let meta = result { results.append(meta) }
+                guard let meta = result else { continue }
+                containerBundleCache[meta.path] = meta.identifier
+                if let index = items.firstIndex(where: { $0.path == meta.path }) {
+                    items[index].subtitle = meta.identifier
+                }
+                resolved += 1
             }
-            return results
-        }
-
-        for meta in resolved {
-            if let index = items.firstIndex(where: { $0.path == meta.path }) {
-                items[index].subtitle = meta.identifier
+            if resolved > 0 {
+                appendLog("resolved \(resolved) container identifiers")
             }
-        }
-        if !resolved.isEmpty {
-            appendLog("resolved \(resolved.count) container identifiers")
         }
     }
 

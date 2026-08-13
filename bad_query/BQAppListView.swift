@@ -87,10 +87,8 @@ struct BQAppListView: View {
     private func loadApps() {
         guard !hasLoaded else { return }
         hasLoaded = true
-        // App containers live across a wide inode range; raise the scan ceiling
-        // so apps with high-inode UUID directories (e.g. WeChat) are included.
-        model.maxInode = 1_500_000
-
+        // defaultMaxInode(for:) returns 1.5M for Application container root,
+        // so we don't need to set model.maxInode here anymore.
         model.load(Self.appRoot, allowMHA: false)
     }
 

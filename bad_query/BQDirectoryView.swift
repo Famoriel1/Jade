@@ -157,7 +157,7 @@ struct BQDirectoryView: View {
             TextField("Max inode", text: $scanInodeText)
                 .keyboardType(.numberPad)
             Button("Scan") {
-                let maxInode = Int64(scanInodeText) ?? model.maxInode
+                let maxInode = Int64(scanInodeText) ?? BQFileSystemModel.defaultMaxInode(for: path)
                 Task { await model.inodeScan(path, maxInode: maxInode) }
             }
             Button("Cancel", role: .cancel) {}
@@ -201,7 +201,7 @@ struct BQDirectoryView: View {
                     }
                 }
                 Button {
-                    scanInodeText = String(model.maxInode)
+                    scanInodeText = String(BQFileSystemModel.defaultMaxInode(for: path))
                     showingScan = true
                 } label: {
                     Label("Inode Scan…", systemImage: "magnifyingglass")

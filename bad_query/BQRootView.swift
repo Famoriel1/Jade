@@ -95,6 +95,28 @@ struct BQRootView: View {
                         }
                     }
                 }
+
+                Section {
+                    NavigationLink {
+                        BQPosterView()
+                    } label: {
+                        HStack {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("PosterBoard")
+                                Text("Apply .tendies wallpaper packs")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                            Spacer()
+                            Image(systemName: "photo.on.rectangle.angled")
+                                .foregroundStyle(.tint)
+                        }
+                    }
+                } header: {
+                    Text("Wallpaper")
+                } footer: {
+                    Text("Import and apply PosterBoard descriptor packs. Respring after applying.")
+                }
                 
                 Section {
                     ForEach(BQFileSystemModel.quickAccess) { entry in
