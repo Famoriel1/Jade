@@ -507,7 +507,9 @@ enum BQPoster {
         print("(pb) write: destDir = \(destDir.path)")
         print("(pb) write: destUrl = \(destUrl.path)")
 
-        // Activate extension for destDir (may already exist from prior runs)
+        // Activate extension for destDir (the descriptors directory).
+        // This single extension covers the whole copyItem operation (like
+        // Pocket-Poster's writeDescriptorsViaBadQuery).
         let h1 = model.ensureExtension(for: destDir.path)
         print("(pb) write: ext destDir=\(h1)")
 
@@ -521,45 +523,12 @@ enum BQPoster {
             try? fm.removeItem(at: destUrl)
         }
 
-        // copyDescriptorTree will create destUrl and activate its extension
-        // after creation, so no need to pre-activate here.
+        // Copy the whole descriptor folder recursively via FileManager.copyItem.
+        // The destDir extension covers this entire operation (proven by
+        // Pocket-Poster's approach).
         print("(pb) write: copying tree from \(src.lastPathComponent)")
-        try copyDescriptorTree(at: src, to: destUrl, model: model)
+        try fm.copyItem(at: src, to: destUrl)
         print("(pb) write: done")
-    }
-
-    @MainActor
-    private static func copyDescriptorTree(at src: URL, to dst: URL, model: BQFileSystemModel) throws {
-        // Create directory FIRST, then activate extension on it (force=true to
-        // bypass any stale cached handle from before the directory existed).
-        try fm.createDirectory(at: dst, withIntermediateDirectories: true)
-        let h = model.ensureExtension(for: dst.path, force: true)
-        print("(pb) copy: dst=\(dst.lastPathComponent), ext handle=\(h)")
-
-        let children = try fm.contentsOfDirectory(at: src, includingPropertiesForKeys: nil, options: .skipsHiddenFiles)
-        print("(pb) copy: \(children.count) children in \(src.lastPathComponent)")
-        for child in children {
-            let dest = dst.appendingPathComponent(child.lastPathComponent)
-            var isDir: ObjCBool = false
-            fm.fileExists(atPath: child.path, isDirectory: &isDir)
-
-            if isDir.boolValue {
-                try copyDescriptorTree(at: child, to: dest, model: model)
-            } else {
-                // Only authorize the parent directory (dst), NOT the file path.
-                // bad_query extensions for non-existent paths don't grant create
-                // permission. The parent directory's extension allows child creation.
-                // (This matches createItem's pattern in BQFileSystem.swift.)
-                guard let data = fm.contents(atPath: child.path) else {
-                    print("(pb) copy: WARNING — could not read \(child.lastPathComponent)")
-                    continue
-                }
-                if !fm.createFile(atPath: dest.path, contents: data) {
-                    print("(pb) copy: ERROR creating \(dest.lastPathComponent)")
-                    throw BQPosterError.unzipFailed("failed to create \(dest.lastPathComponent)")
-                }
-            }
-        }
     }
 
     // MARK: - ID randomization
