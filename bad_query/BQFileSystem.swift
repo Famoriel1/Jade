@@ -353,25 +353,53 @@ final class BQFileSystemModel {
         self.maxInode = maxInode
         isScanning = true
         usedInodeScan = true
-        appendLog("inode scan of \(path) (max inode \(maxInode))…")
+        appendLog("inode scan of \(path) (max inode \(maxInode))…") 
 
-        // bad_query_list + stat both run off the main actor; inode scans can
-        // return hundreds/thousands of paths so statItems parallelises them.
-        let found: [FSItem]? = await Task.detached(priority: .userInitiated) {
-            var cPath = path.utf8CString.map { Int8($0) }
-            guard let raw = bad_query_list(&cPath, maxInode) else { return nil }
-            defer { free(raw) }
-            let paths = String(cString: raw).split(separator: "\n").map(String.init)
-            return Self.statItems(paths: paths)
-        }.value
+        // Split the [1, maxInode] range into parallel chunks. fsgetpath is a
+        // stateless syscall, so concurrent bad_query_list_range calls are safe
+        // and the bottleneck (serial fsgetpath probes) becomes parallel.
+        let chunkSize: Int64 = 8192
+        let chunks: [(Int64, Int64)] = stride(from: Int64(1), through: maxInode, by: Int(chunkSize)).map {
+            start in (start, min(start + chunkSize - 1, maxInode))
+        }
+
+        let pathCopy = path
+        let allPaths: [String] = await withTaskGroup(of: [String]?.self) { group in
+            for (start, end) in chunks {
+                group.addTask {
+                    var cPath = pathCopy.utf8CString.map { Int8($0) }
+                    guard let raw = bad_query_list_range(&cPath, start, end) else {
+                        return nil
+                    }
+                    defer { free(raw) }
+                    return String(cString: raw).split(separator: "\n").map(String.init)
+                }
+            }
+            var merged: [String] = []
+            for await result in group {
+                if let batch = result { merged.append(contentsOf: batch) }
+            }
+            return merged
+        }
 
         isScanning = false
-        guard let newItems = found, !newItems.isEmpty else {
+        guard !allPaths.isEmpty else {
             lastError = "Inode scan failed: statfs refused for this path."
             statusMessage = "Inode scan failed"
             return
         }
-        items = newItems.sorted(by: Self.itemOrder)
+
+        // Stat the discovered paths in parallel (large batches use
+        // concurrentPerform inside statItems).
+        let items = await Task.detached(priority: .userInitiated) {
+            Self.statItems(paths: allPaths)
+        }.value
+
+        guard !items.isEmpty else {
+            statusMessage = "0 items (inode scan)"
+            return
+        }
+        self.items = items.sorted(by: Self.itemOrder)
         statusMessage = "\(items.count) items (inode scan)"
         await resolveContainerMetadata(for: path)
     }
