@@ -20,183 +20,115 @@ struct BQRootView: View {
     @State private var model = BQFileSystemModel()
     @State private var showingLog = false
     @EnvironmentObject var state: AppState
-
+    
     var body: some View {
         @Bindable var model = model
-        return NavigationStack {
-            List {
-                if BQFileSystemModel.isMobileHouseArrest {
+        return TabView {
+            NavigationStack {
+                List {
                     Section {
-                        Toggle("Use MHAHelper", isOn: $model.useMHAHelper)
-                            .onChange(of: model.useMHAHelper) { _, on in
-                                if !on { model.releaseAllExtensions() }
-                            }
-                    } header: {
-                        Text("MHA")
-                    } footer: {
-                        Text("Access app data containers via MobileHouseArrest (class 2) instead of path traversal. Browse into any app container to read and write its files.")
-                    }
-                }
-
-                if BQSandboxPoCModel.isMobileHouseArrest {
-                    Section {
-                        NavigationLink {
-                            BQSandboxPoCView()
-                        } label: {
-                            HStack {
+                        ForEach(BQFileSystemModel.quickAccess) { entry in
+                            NavigationLink {
+                                BQDirectoryView(path: entry.path)
+                            } label: {
                                 VStack(alignment: .leading, spacing: 2) {
-                                    Text("Sandbox Escape PoC")
-                                    Text("MobileHouseArrest container escape & class-13 PoC")
+                                    Text(entry.title)
+                                    Text(entry.path)
                                         .font(.caption)
                                         .foregroundStyle(.secondary)
+                                        .lineLimit(1)
                                 }
-                                Spacer()
-                                Image(systemName: "shield.lefthalf.filled")
-                                    .foregroundStyle(.tint)
                             }
                         }
                     } header: {
-                        Text("Research")
+                        Text("File browsing")
                     } footer: {
-                        Text("Bundle ID matches com.apple.mobile.MobileHouseArrest — exploit methods are available.")
+                        Text("iOS 26 needs the App Group sacrifice route for App Groups; iOS 27 reaches System containers directly.")
                     }
-                }
-
-                Section(header: Text("Container Roots")) {
-                    NavigationLink {
-                        BQAppListView()
-                    } label: {
+                    
+                    Section("Session") {
                         HStack {
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text("Apps")
-                                Text("Browse app containers by bundle ID")
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
-                            }
+                            Label("Active Extensions", systemImage: "key.fill")
                             Spacer()
-                            Image(systemName: "apps.iphone")
-                                .foregroundStyle(.tint)
+                            Text("\(model.extensionCount)")
+                                .foregroundStyle(.secondary)
+                                .monospacedDigit()
                         }
-                    }
-
-                    NavigationLink {
-                        BQMobileGestaltView()
-                    } label: {
-                        HStack {
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text("MobileGestalt Editor")
-                                Text("Modify device features, artwork, eligibility")
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
-                            }
-                            Spacer()
-                            Image(systemName: "gearshape.2")
-                                .foregroundStyle(.tint)
-                        }
-                    }
-                }
-
-                Section {
-                    NavigationLink {
-                        BQPosterView()
-                    } label: {
-                        HStack {
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text("PosterBoard")
-                                Text("Apply .tendies wallpaper packs")
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
-                            }
-                            Spacer()
-                            Image(systemName: "photo.on.rectangle.angled")
-                                .foregroundStyle(.tint)
-                        }
-                    }
-                } header: {
-                    Text("Wallpaper")
-                } footer: {
-                    Text("Import and apply PosterBoard descriptor packs. Respring after applying.")
-                }
-                
-                Section {
-                    ForEach(BQFileSystemModel.quickAccess) { entry in
-                        NavigationLink {
-                            BQDirectoryView(path: entry.path)
+                        Button {
+                            showingLog = true
                         } label: {
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text(entry.title)
-                                Text(entry.path)
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
-                                    .lineLimit(1)
-                            }
+                            Label("Activity Log", systemImage: "text.alignleft")
+                        }
+                        Button {
+                            model.releaseAllExtensions()
+                        } label: {
+                            Label("Release All Extensions", systemImage: "xmark.shield")
+                        }
+                        .disabled(model.extensionCount == 0)
+                        Button {
+                            openURL("https://www.icloud.com/shortcuts/b402f010cf264d2c987db5b3e3bcc526")
+                        } label: {
+                            Label("Get Reboot Shortcut", systemImage: "square.and.arrow.down")
+                        }
+                        Button {
+                            state.respring()
+                        } label: {
+                            Label("Respring", systemImage: "arrow.clockwise")
+                        }
+                        Button {
+                            openURL("shortcuts://run-shortcut?name=reboot")
+                        } label: {
+                            Label("Reboot", systemImage: "power")
                         }
                     }
-                } header: {
-                    Text("File browsing")
-                } footer: {
-                    Text("iOS 26 needs the App Group sacrifice route for App Groups; iOS 27 reaches System containers directly.")
-                }
-
-                Section("Session") {
-                    HStack {
-                        Label("Active Extensions", systemImage: "key.fill")
-                        Spacer()
-                        Text("\(model.extensionCount)")
-                            .foregroundStyle(.secondary)
-                            .monospacedDigit()
-                    }
-                    Button {
-                        showingLog = true
-                    } label: {
-                        Label("Activity Log", systemImage: "text.alignleft")
-                    }
-                    Button {
-                        model.releaseAllExtensions()
-                    } label: {
-                        Label("Release All Extensions", systemImage: "xmark.shield")
-                    }
-                    .disabled(model.extensionCount == 0)
-                    Button {
-                        openURL("https://www.icloud.com/shortcuts/b402f010cf264d2c987db5b3e3bcc526")
-                    } label: {
-                        Label("Get Reboot Shortcut", systemImage: "square.and.arrow.down")
-                    }
-                    Button {
-                        state.respring()
-                    } label: {
-                        Label("Respring", systemImage: "arrow.clockwise")
-                    }
-                    Button {
-                        openURL("shortcuts://run-shortcut?name=reboot")
-                    } label: {
-                        Label("Reboot", systemImage: "power")
+                    
+                    if let error = model.lastError {
+                        Section {
+                            Text(error)
+                                .font(.caption)
+                                .foregroundStyle(.red)
+                                .textSelection(.enabled)
+                        }
                     }
                 }
-
-                if let error = model.lastError {
-                    Section {
-                        Text(error)
+                .navigationTitle("Jade")
+                .overlay(alignment: .bottom) {
+                    if !model.statusMessage.isEmpty {
+                        Text(model.statusMessage)
                             .font(.caption)
-                            .foregroundStyle(.red)
-                            .textSelection(.enabled)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 6)
+                            .background(.regularMaterial, in: Capsule())
+                            .padding(.bottom, 8)
+                            .lineLimit(1)
                     }
                 }
-            }
-            .navigationTitle("BQ File Manager")
-            .overlay(alignment: .bottom) {
-                if !model.statusMessage.isEmpty {
-                    Text(model.statusMessage)
-                        .font(.caption)
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 6)
-                        .background(.regularMaterial, in: Capsule())
-                        .padding(.bottom, 8)
-                        .lineLimit(1)
+                .sheet(isPresented: $showingLog) {
+                    BQLogView()
                 }
             }
-            .sheet(isPresented: $showingLog) {
-                BQLogView()
+            .tabItem {
+                Label("File", systemImage: "folder")
+            }
+            
+            NavigationStack {
+                BQAppListView()
+            }
+            .tabItem {
+                Label("Apps", systemImage: "app.grid")
+            }
+            
+            NavigationStack {
+                BQMobileGestaltView()
+            }
+            .tabItem {
+                Label("Gestalt", systemImage: "apps.iphone")
+            }
+            NavigationStack {
+                BQPosterView()
+            }
+            .tabItem {
+                Label("Poster", systemImage: "photo.on.rectangle.angled")
             }
         }
         .environment(model)
@@ -206,7 +138,7 @@ struct BQRootView: View {
 struct BQLogView: View {
     @Environment(BQFileSystemModel.self) private var model
     @Environment(\.dismiss) private var dismiss
-
+    
     var body: some View {
         NavigationStack {
             ScrollViewReader { proxy in

@@ -7,11 +7,11 @@
 	objects = {
 
 /* Begin PBXFileReference section */
-		364079F5302A9C1A0028C4A1 /* bad_query.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = bad_query.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		364079F5302A9C1A0028C4A1 /* Jade.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Jade.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
-		364079F8302A9C800028C4A1 /* Exceptions for "bad_query" folder in "Compile Sources" phase from "bad_query" target */ = {
+		364079F8302A9C800028C4A1 /* Exceptions for "bad_query" folder in "Compile Sources" phase from "Jade" target */ = {
 			isa = PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet;
 			buildPhase = 3695D2C0302A8A3300D13475 /* Sources */;
 			membershipExceptions = (
@@ -25,7 +25,7 @@
 		3695D2C6302A8A3300D13475 /* bad_query */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				364079F8302A9C800028C4A1 /* Exceptions for "bad_query" folder in "Compile Sources" phase from "bad_query" target */,
+				364079F8302A9C800028C4A1 /* Exceptions for "bad_query" folder in "Compile Sources" phase from "Jade" target */,
 			);
 			path = bad_query;
 			sourceTree = "<group>";
@@ -45,16 +45,16 @@
 			isa = PBXGroup;
 			children = (
 				3695D2C6302A8A3300D13475 /* bad_query */,
-				364079F5302A9C1A0028C4A1 /* bad_query.app */,
+				364079F5302A9C1A0028C4A1 /* Jade.app */,
 			);
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		3695D2C3302A8A3300D13475 /* bad_query */ = {
+		3695D2C3302A8A3300D13475 /* Jade */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 3695D2CF302A8A3400D13475 /* Build configuration list for PBXNativeTarget "bad_query" */;
+			buildConfigurationList = 3695D2CF302A8A3400D13475 /* Build configuration list for PBXNativeTarget "Jade" */;
 			buildPhases = (
 				3695D2C0302A8A3300D13475 /* Sources */,
 				3695D2C1302A8A3300D13475 /* Frameworks */,
@@ -65,9 +65,9 @@
 			fileSystemSynchronizedGroups = (
 				3695D2C6302A8A3300D13475 /* bad_query */,
 			);
-			name = bad_query;
+			name = Jade;
 			productName = bad_query;
-			productReference = 364079F5302A9C1A0028C4A1 /* bad_query.app */;
+			productReference = 364079F5302A9C1A0028C4A1 /* Jade.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -86,7 +86,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 3695D2BF302A8A3300D13475 /* Build configuration list for PBXProject "bad_query" */;
+			buildConfigurationList = 3695D2BF302A8A3300D13475 /* Build configuration list for PBXProject "Jade" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -100,7 +100,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				3695D2C3302A8A3300D13475 /* bad_query */,
+				3695D2C3302A8A3300D13475 /* Jade */,
 			);
 		};
 /* End PBXProject section */
@@ -122,7 +122,7 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
-		3695D2CD302A8A3400D13475 /* Debug configuration for PBXProject "bad_query" */ = {
+		3695D2CD302A8A3400D13475 /* Debug configuration for PBXProject "Jade" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -186,7 +186,7 @@
 			};
 			name = Debug;
 		};
-		3695D2CE302A8A3400D13475 /* Release configuration for PBXProject "bad_query" */ = {
+		3695D2CE302A8A3400D13475 /* Release configuration for PBXProject "Jade" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -243,10 +243,10 @@
 			};
 			name = Release;
 		};
-		3695D2D0302A8A3400D13475 /* Debug configuration for PBXNativeTarget "bad_query" */ = {
+		3695D2D0302A8A3400D13475 /* Debug configuration for PBXNativeTarget "Jade" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = BQIcon;
+				ASSETCATALOG_COMPILER_APPICON_NAME = JadeIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CLANG_ENABLE_MODULES = YES;
@@ -256,14 +256,15 @@
 				DEVELOPMENT_TEAM = L7HX85L6GU;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = BQTools;
+				INFOPLIST_KEY_CFBundleDisplayName = Jade;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = "";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -284,10 +285,10 @@
 			};
 			name = Debug;
 		};
-		3695D2D1302A8A3400D13475 /* Release configuration for PBXNativeTarget "bad_query" */ = {
+		3695D2D1302A8A3400D13475 /* Release configuration for PBXNativeTarget "Jade" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = BQIcon;
+				ASSETCATALOG_COMPILER_APPICON_NAME = JadeIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CLANG_ENABLE_MODULES = YES;
@@ -297,14 +298,15 @@
 				DEVELOPMENT_TEAM = L7HX85L6GU;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = BQTools;
+				INFOPLIST_KEY_CFBundleDisplayName = Jade;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = "";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -327,19 +329,19 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		3695D2BF302A8A3300D13475 /* Build configuration list for PBXProject "bad_query" */ = {
+		3695D2BF302A8A3300D13475 /* Build configuration list for PBXProject "Jade" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				3695D2CD302A8A3400D13475 /* Debug configuration for PBXProject "bad_query" */,
-				3695D2CE302A8A3400D13475 /* Release configuration for PBXProject "bad_query" */,
+				3695D2CD302A8A3400D13475 /* Debug configuration for PBXProject "Jade" */,
+				3695D2CE302A8A3400D13475 /* Release configuration for PBXProject "Jade" */,
 			);
 			defaultConfigurationName = Release;
 		};
-		3695D2CF302A8A3400D13475 /* Build configuration list for PBXNativeTarget "bad_query" */ = {
+		3695D2CF302A8A3400D13475 /* Build configuration list for PBXNativeTarget "Jade" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				3695D2D0302A8A3400D13475 /* Debug configuration for PBXNativeTarget "bad_query" */,
-				3695D2D1302A8A3400D13475 /* Release configuration for PBXNativeTarget "bad_query" */,
+				3695D2D0302A8A3400D13475 /* Debug configuration for PBXNativeTarget "Jade" */,
+				3695D2D1302A8A3400D13475 /* Release configuration for PBXNativeTarget "Jade" */,
 			);
 			defaultConfigurationName = Release;
 		};

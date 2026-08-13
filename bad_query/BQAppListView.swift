@@ -79,6 +79,7 @@ struct BQAppListView: View {
                 } label: {
                     Image(systemName: "arrow.clockwise")
                 }
+                .onAppear { loadApps() }
             }
         }
         .onAppear { loadApps() }
