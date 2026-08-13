@@ -59,6 +59,7 @@ final class BQMobileGestaltModel {
     var alertInfo: MGAlertInfo?
     var extensionHandle: Int64 = 0
     var isApplying = false
+    var isDirty = false
 
     // Paths
     static let systemGroupRoot = "/var/containers/Shared/SystemGroup"
@@ -232,6 +233,7 @@ final class BQMobileGestaltModel {
 
             statusMessage = "MobileGestalt loaded"
             appendLog("gestalt loaded — subtype=\(ogSub), device=\(ogName)")
+            isDirty = false
         } catch {
             lastError = "Failed to load: \(error.localizedDescription)"
             alertInfo = MGAlertInfo(title: "Failed to load MobileGestalt!", body: "Restart the app and try again. Check logs for details.")
@@ -263,6 +265,7 @@ final class BQMobileGestaltModel {
 
             statusMessage = "Tweaks applied — reboot to take effect"
             appendLog("applied gestalt tweaks (\(data.count) bytes)")
+            isDirty = false
             alertInfo = MGAlertInfo(
                 title: "Successfully applied Gestalt tweaks!",
                 body: "Reboot your device for changes to take effect.",

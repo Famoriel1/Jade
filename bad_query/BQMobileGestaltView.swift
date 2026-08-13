@@ -70,6 +70,9 @@ struct BQMobileGestaltView: View {
                 }
             }
         }
+        .onAppear {
+            if !model.loaded {model.load()}
+        }
     }
 
     // MARK: - Gestalt List
@@ -262,6 +265,17 @@ struct BQMobileGestaltView: View {
                 Label("Internal", systemImage: "ant")
             }
 
+            // Advanced
+            Section {
+                NavigationLink {
+                    AdvancedGestaltEditor(model: model)
+                } label: {
+                    Label("Advanced Field Editor", systemImage: "slider.horizontal.3")
+                }
+            } header: {
+                Label("Advanced", systemImage: "wrench.and.screwdriver")
+            }
+
             // Session
             Section {
                 HStack {
@@ -328,5 +342,441 @@ struct MGToggle: View {
 
     private func currentVersion() -> Double {
         Double(UIDevice.current.systemVersion) ?? 0
+    }
+}
+
+// MARK: - Advanced Field Editor Types
+
+enum PlistSection: Hashable {
+    case cacheExtra
+    case topLevel
+}
+
+struct PlistKey: Hashable {
+    let section: PlistSection
+    let key: String
+}
+
+enum FieldEditorRoute: Identifiable, Hashable {
+    case edit(PlistKey)
+    case addCacheExtra
+
+    var id: Self { self }
+}
+
+enum AddFieldError: LocalizedError {
+    case emptyKey
+    case duplicateKey(String)
+
+    var errorDescription: String? {
+        switch self {
+        case .emptyKey:
+            return "Key cannot be empty."
+        case .duplicateKey(let key):
+            return "Key \"\(key)\" already exists."
+        }
+    }
+}
+
+enum GestaltValueType: String, CaseIterable {
+    case bool = "Bool"
+    case integer = "Integer"
+    case string = "String"
+}
+
+struct PlistValueInfo {
+    let display: String
+    let searchText: String
+
+    static func info(for value: Any?) -> PlistValueInfo {
+        guard let value else {
+            return PlistValueInfo(display: "—", searchText: "")
+        }
+        if let n = value as? NSNumber, CFGetTypeID(n) == CFBooleanGetTypeID() {
+            let b = n.boolValue
+            return PlistValueInfo(display: b ? "true" : "false",
+                                  searchText: b ? "true" : "false")
+        }
+        if let data = value as? Data {
+            return PlistValueInfo(display: "Data (\(data.count) bytes)",
+                                  searchText: "data")
+        }
+        if let dict = value as? [String: Any] {
+            return PlistValueInfo(display: "Dict (\(dict.count) keys)",
+                                  searchText: "dictionary")
+        }
+        if let arr = value as? [Any] {
+            return PlistValueInfo(display: "Array (\(arr.count) items)",
+                                  searchText: "array")
+        }
+        let str = "\(value)"
+        return PlistValueInfo(display: str, searchText: str)
+    }
+}
+
+// MARK: - Advanced Gestalt Editor
+
+struct AdvancedGestaltEditor: View {
+    @Bindable var model: BQMobileGestaltModel
+
+    @State private var searchText = ""
+    @State private var activeEditor: FieldEditorRoute?
+
+    private var cacheExtraKeys: [String] {
+        let cacheExtra = model.mgDict["CacheExtra"] as? NSMutableDictionary
+        let keys = cacheExtra?.allKeys as? [String] ?? []
+        return filtered(keys, section: .cacheExtra)
+    }
+
+    private var topLevelKeys: [String] {
+        let keys = (model.mgDict.allKeys as? [String] ?? [])
+            .filter { $0 != "CacheExtra" }
+        return filtered(keys, section: .topLevel)
+    }
+
+    var body: some View {
+        List {
+            if model.loaded {
+                KeySection(
+                    title: "CacheExtra",
+                    keys: cacheExtraKeys,
+                    value: { value(for: PlistKey(section: .cacheExtra, key: $0)) },
+                    select: { activeEditor = .edit(PlistKey(section: .cacheExtra, key: $0)) }
+                )
+
+                KeySection(
+                    title: "Top Level",
+                    keys: topLevelKeys,
+                    value: { value(for: PlistKey(section: .topLevel, key: $0)) },
+                    select: { activeEditor = .edit(PlistKey(section: .topLevel, key: $0)) }
+                )
+            }
+        }
+        .navigationTitle("Advanced Field Editor")
+        .searchable(text: $searchText, prompt: "Search key or value")
+        .toolbar {
+            ToolbarItemGroup(placement: .topBarTrailing) {
+                Button {
+                    activeEditor = .addCacheExtra
+                } label: {
+                    Image(systemName: "plus")
+                }
+                .accessibilityLabel("Add CacheExtra Field")
+                .disabled(!model.loaded || model.isApplying)
+
+                Button("Save") { model.apply() }
+                    .fontWeight(.semibold)
+                    .disabled(!model.isDirty || model.isApplying)
+            }
+        }
+        .sheet(item: $activeEditor) { editor in
+            Group {
+                switch editor {
+                case .edit(let key):
+                    ValueEditor(
+                        key: key.key,
+                        initialValue: value(for: key),
+                        save: { update($0, for: key) },
+                        delete: key.section == .cacheExtra
+                            ? { deleteCacheExtraField(key.key) }
+                            : nil
+                    )
+                case .addCacheExtra:
+                    AddCacheExtraFieldEditor(save: addCacheExtraField)
+                }
+            }
+            .presentationDetents([.medium, .large])
+        }
+    }
+
+    private func filtered(_ keys: [String], section: PlistSection) -> [String] {
+        let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !query.isEmpty else { return keys }
+
+        return keys.filter { key in
+            let reference = PlistKey(section: section, key: key)
+            let info = PlistValueInfo.info(for: value(for: reference))
+            return key.localizedCaseInsensitiveContains(query)
+                || info.searchText.localizedCaseInsensitiveContains(query)
+        }
+    }
+
+    private func value(for key: PlistKey) -> Any? {
+        switch key.section {
+        case .cacheExtra:
+            let cacheExtra = model.mgDict["CacheExtra"] as? NSMutableDictionary
+            return cacheExtra?[key.key]
+        case .topLevel:
+            return model.mgDict[key.key]
+        }
+    }
+
+    private func update(_ value: Any, for key: PlistKey) {
+        switch key.section {
+        case .cacheExtra:
+            let cacheExtra = model.mgDict["CacheExtra"] as? NSMutableDictionary
+                ?? NSMutableDictionary()
+            model.mgDict["CacheExtra"] = cacheExtra
+            cacheExtra[key.key] = value
+        case .topLevel:
+            model.mgDict[key.key] = value
+        }
+        model.isDirty = true
+    }
+
+    private func addCacheExtraField(key: String, value: Any) throws {
+        let normalizedKey = key.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !normalizedKey.isEmpty else {
+            throw AddFieldError.emptyKey
+        }
+        let cacheExtra = model.mgDict["CacheExtra"] as? NSMutableDictionary
+            ?? NSMutableDictionary()
+        model.mgDict["CacheExtra"] = cacheExtra
+        guard cacheExtra[normalizedKey] == nil else {
+            throw AddFieldError.duplicateKey(normalizedKey)
+        }
+        cacheExtra[normalizedKey] = value
+        model.isDirty = true
+    }
+
+    private func deleteCacheExtraField(_ key: String) {
+        let cacheExtra = model.mgDict["CacheExtra"] as? NSMutableDictionary
+        cacheExtra?.removeObject(forKey: key)
+        model.isDirty = true
+    }
+}
+
+// MARK: - Key Section
+
+struct KeySection: View {
+    let title: String
+    let keys: [String]
+    let value: (String) -> Any?
+    let select: (String) -> Void
+
+    var body: some View {
+        if !keys.isEmpty {
+            Section(title) {
+                ForEach(keys, id: \.self) { key in
+                    Button {
+                        select(key)
+                    } label: {
+                        HStack {
+                            Text(key)
+                                .font(.system(.body, design: .monospaced))
+                                .lineLimit(1)
+                                .truncationMode(.middle)
+                            Spacer()
+                            Text(PlistValueInfo.info(for: value(key)).display)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                                .lineLimit(1)
+                        }
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+        }
+    }
+}
+
+// MARK: - Value Editor
+
+struct ValueEditor: View {
+    let key: String
+    let initialValue: Any?
+    let save: (Any) -> Void
+    let delete: (() -> Void)?
+
+    @Environment(\.dismiss) private var dismiss
+    @State private var valueType: GestaltValueType = .integer
+    @State private var boolValue = false
+    @State private var intValue: Int = 0
+    @State private var stringValue: String = ""
+    @State private var isComplex = false
+    @State private var complexDisplay = ""
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section("Key") {
+                    Text(key)
+                        .font(.system(.body, design: .monospaced))
+                        .textSelection(.enabled)
+                }
+
+                Section("Value") {
+                    if isComplex {
+                        Text(complexDisplay)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    } else {
+                        Picker("Type", selection: $valueType) {
+                            ForEach(GestaltValueType.allCases, id: \.self) { type in
+                                Text(type.rawValue).tag(type)
+                            }
+                        }
+                        switch valueType {
+                        case .bool:
+                            Toggle("Enabled", isOn: $boolValue)
+                        case .integer:
+                            TextField("Value", value: $intValue, format: .number)
+                                .keyboardType(.numberPad)
+                        case .string:
+                            TextField("Value", text: $stringValue)
+                                .autocorrectionDisabled()
+                        }
+                    }
+                }
+
+                if let delete {
+                    Section {
+                        Button("Delete Field", role: .destructive) {
+                            delete()
+                            dismiss()
+                        }
+                    }
+                }
+            }
+            .navigationTitle("Edit Field")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") { dismiss() }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Save") { saveValue() }
+                        .disabled(isComplex)
+                }
+            }
+        }
+        .onAppear { configureForInitialValue() }
+    }
+
+    private func configureForInitialValue() {
+        guard let v = initialValue else {
+            valueType = .integer
+            intValue = 0
+            return
+        }
+        if let n = v as? NSNumber, CFGetTypeID(n) == CFBooleanGetTypeID() {
+            valueType = .bool
+            boolValue = n.boolValue
+        } else if let i = v as? Int {
+            valueType = .integer
+            intValue = i
+        } else if let n = v as? NSNumber {
+            valueType = .integer
+            intValue = n.intValue
+        } else if let s = v as? String {
+            valueType = .string
+            stringValue = s
+        } else if let data = v as? Data {
+            isComplex = true
+            complexDisplay = "Data (\(data.count) bytes) — not editable here"
+        } else if let dict = v as? [String: Any] {
+            isComplex = true
+            complexDisplay = "Dictionary (\(dict.count) keys) — not editable here"
+        } else if let arr = v as? [Any] {
+            isComplex = true
+            complexDisplay = "Array (\(arr.count) items) — not editable here"
+        } else {
+            isComplex = true
+            complexDisplay = "\(v)"
+        }
+    }
+
+    private func saveValue() {
+        let value: Any
+        switch valueType {
+        case .bool:
+            value = boolValue ? 1 : 0
+        case .integer:
+            value = intValue
+        case .string:
+            value = stringValue
+        }
+        save(value)
+        dismiss()
+    }
+}
+
+// MARK: - Add CacheExtra Field Editor
+
+struct AddCacheExtraFieldEditor: View {
+    let save: (String, Any) throws -> Void
+
+    @Environment(\.dismiss) private var dismiss
+    @State private var key = ""
+    @State private var valueType: GestaltValueType = .integer
+    @State private var boolValue = true
+    @State private var intValue = 1
+    @State private var stringValue = ""
+    @State private var showError = false
+    @State private var errorMessage = ""
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section("Key") {
+                    TextField("Key", text: $key)
+                        .font(.system(.body, design: .monospaced))
+                        .autocorrectionDisabled()
+                        .textInputAutocapitalization(.never)
+                }
+
+                Section("Value") {
+                    Picker("Type", selection: $valueType) {
+                        ForEach(GestaltValueType.allCases, id: \.self) { type in
+                            Text(type.rawValue).tag(type)
+                        }
+                    }
+                    switch valueType {
+                    case .bool:
+                        Toggle("Enabled", isOn: $boolValue)
+                    case .integer:
+                        TextField("Value", value: $intValue, format: .number)
+                            .keyboardType(.numberPad)
+                    case .string:
+                        TextField("Value", text: $stringValue)
+                            .autocorrectionDisabled()
+                    }
+                }
+            }
+            .navigationTitle("Add CacheExtra Field")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") { dismiss() }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Add") { addField() }
+                }
+            }
+            .alert("Error", isPresented: $showError) {
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text(errorMessage)
+            }
+        }
+    }
+
+    private func addField() {
+        let value: Any
+        switch valueType {
+        case .bool:
+            value = boolValue ? 1 : 0
+        case .integer:
+            value = intValue
+        case .string:
+            value = stringValue
+        }
+        do {
+            try save(key, value)
+            dismiss()
+        } catch {
+            errorMessage = error.localizedDescription
+            showError = true
+        }
     }
 }

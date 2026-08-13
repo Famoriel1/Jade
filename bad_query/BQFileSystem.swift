@@ -16,7 +16,7 @@ import Darwin
 
 // MARK: - FSItem
 
-struct FSItem: Identifiable, Hashable {
+struct FSItem: Identifiable, Hashable, Sendable {
     var path: String
     var name: String
     var isDirectory: Bool
@@ -26,6 +26,10 @@ struct FSItem: Identifiable, Hashable {
     var subtitle: String?
 
     var id: String { path }
+
+    /// Sentinel used to pre-allocate a buffer for concurrent stat fills.
+    static let empty = FSItem(path: "", name: "", isDirectory: false,
+                              typeKnown: false, size: nil, modified: nil, subtitle: nil)
 }
 
 // MARK: - Errors
@@ -115,6 +119,12 @@ enum PreviewLoader {
 struct ResolvedMeta: Sendable {
     let path: String
     let identifier: String
+}
+
+/// Outcome of an off-main-actor directory listing (enumerate + stat).
+private struct ListingOutcome: Sendable {
+    let items: [FSItem]
+    let error: String?
 }
 
 @MainActor
@@ -311,20 +321,25 @@ final class BQFileSystemModel {
         items = []
 
         let handle = ensureExtension(for: path, allowMHA: allowMHA)
-        var names: [String]?
-        do {
-            names = try FileManager.default.contentsOfDirectory(atPath: path)
-        } catch {
-            appendLog("readdir failed for \(path): \(error.localizedDescription)")
-        }
 
-        if let names {
-            items = names
-                .map { makeItem(parent: path, name: $0) }
-                .sorted(by: Self.itemOrder)
+        // Enumerate + stat off the main actor so the UI stays responsive even
+        // for directories with hundreds of entries.
+        let outcome = await Task.detached(priority: .userInitiated) { () -> ListingOutcome in
+            do {
+                let names = try FileManager.default.contentsOfDirectory(atPath: path)
+                let fullPaths = names.map { path + "/" + $0 }
+                return ListingOutcome(items: Self.statItems(paths: fullPaths), error: nil)
+            } catch {
+                return ListingOutcome(items: [], error: error.localizedDescription)
+            }
+        }.value
+
+        if outcome.error == nil {
+            items = outcome.items.sorted(by: Self.itemOrder)
             statusMessage = "\(items.count) items"
             await resolveContainerMetadata(for: path)
         } else {
+            appendLog("readdir failed for \(path): \(outcome.error ?? "")")
             let reason = handle > 0
                 ? "directory not readable"
                 : (BQError.extensionFailed(handle).errorDescription ?? "unknown")
@@ -340,22 +355,23 @@ final class BQFileSystemModel {
         usedInodeScan = true
         appendLog("inode scan of \(path) (max inode \(maxInode))…")
 
-        let found: [String]? = await Task.detached(priority: .userInitiated) {
+        // bad_query_list + stat both run off the main actor; inode scans can
+        // return hundreds/thousands of paths so statItems parallelises them.
+        let found: [FSItem]? = await Task.detached(priority: .userInitiated) {
             var cPath = path.utf8CString.map { Int8($0) }
             guard let raw = bad_query_list(&cPath, maxInode) else { return nil }
             defer { free(raw) }
-            return String(cString: raw).split(separator: "\n").map(String.init)
+            let paths = String(cString: raw).split(separator: "\n").map(String.init)
+            return Self.statItems(paths: paths)
         }.value
 
         isScanning = false
-        guard let found, !found.isEmpty else {
+        guard let newItems = found, !newItems.isEmpty else {
             lastError = "Inode scan failed: statfs refused for this path."
             statusMessage = "Inode scan failed"
             return
         }
-        items = found
-            .map { makeItem(parent: path, name: lastComponent($0), fullPath: $0) }
-            .sorted(by: Self.itemOrder)
+        items = newItems.sorted(by: Self.itemOrder)
         statusMessage = "\(items.count) items (inode scan)"
         await resolveContainerMetadata(for: path)
     }
@@ -365,13 +381,34 @@ final class BQFileSystemModel {
         return lhs.name.localizedStandardCompare(rhs.name) == .orderedAscending
     }
 
-    private func makeItem(parent: String, name: String, fullPath: String? = nil) -> FSItem {
-        let full = fullPath ?? parent + "/" + name
-        var item = FSItem(path: full, name: name, isDirectory: false, typeKnown: false,
+    /// Stat a batch of paths into FSItems off the main actor. For large
+    /// directories (> 64 entries) the lstat syscalls are parallelised with
+    /// `concurrentPerform`; small directories stay serial to avoid GCD
+    /// dispatch overhead. The pre-allocated buffer is filled through an
+    /// unsafe mutable buffer pointer so each iteration writes a distinct
+    /// index without triggering CoW.
+    nonisolated static func statItems(paths: [String]) -> [FSItem] {
+        let count = paths.count
+        guard count > 0 else { return [] }
+        if count > 64 {
+            var items = [FSItem](repeating: .empty, count: count)
+            items.withUnsafeMutableBufferPointer { buffer in
+                DispatchQueue.concurrentPerform(iterations: count) { i in
+                    buffer[i] = statItem(path: paths[i])
+                }
+            }
+            return items
+        }
+        return paths.map { statItem(path: $0) }
+    }
+
+    /// Stat a single path into an FSItem (name derived from the path).
+    nonisolated static func statItem(path: String) -> FSItem {
+        let name = (path as NSString).lastPathComponent
+        var item = FSItem(path: path, name: name, isDirectory: false, typeKnown: false,
                           size: nil, modified: nil, subtitle: nil)
         var st = stat()
-        let result = full.withCString { lstat($0, &st) }
-        if result == 0 {
+        if path.withCString({ lstat($0, &st) }) == 0 {
             item.typeKnown = true
             item.isDirectory = (st.st_mode & S_IFMT) == S_IFDIR
             item.size = item.isDirectory ? nil : Int64(st.st_size)
@@ -387,24 +424,32 @@ final class BQFileSystemModel {
 
         // Each metadata plist needs its own extension (bad_query extensions are
         // per-path, not recursive). Activate them on the main actor, then parse
-        // in the background.
+        // concurrently.
         for p in paths {
             ensureExtension(for: p + "/.com.apple.mobile_container_manager.metadata.plist", allowMHA: false)
         }
 
-        // Read and parse metadata plists in the background.
-        let resolved = await Task.detached(priority: .userInitiated) {
-            var results: [ResolvedMeta] = []
+        // Read and parse each metadata plist concurrently — each one is an
+        // independent file read + plist decode, so a task group parallelises
+        // them effectively.
+        let resolved: [ResolvedMeta] = await withTaskGroup(of: ResolvedMeta?.self) { group in
             for containerPath in paths {
-                let metaPath = containerPath + "/.com.apple.mobile_container_manager.metadata.plist"
-                guard let data = FileManager.default.contents(atPath: metaPath),
-                      let plist = (try? PropertyListSerialization.propertyList(from: data, options: [], format: nil)) as? [String: Any],
-                      let identifier = plist["MCMMetadataIdentifier"] as? String
-                else { continue }
-                results.append(ResolvedMeta(path: containerPath, identifier: identifier))
+                group.addTask {
+                    let metaPath = containerPath + "/.com.apple.mobile_container_manager.metadata.plist"
+                    guard let data = FileManager.default.contents(atPath: metaPath),
+                          let plist = (try? PropertyListSerialization.propertyList(from: data, options: [], format: nil)) as? [String: Any],
+                          let identifier = plist["MCMMetadataIdentifier"] as? String
+                    else { return nil }
+                    return ResolvedMeta(path: containerPath, identifier: identifier)
+                }
+            }
+            var results: [ResolvedMeta] = []
+            for await result in group {
+                if let meta = result { results.append(meta) }
             }
             return results
-        }.value
+        }
+
         for meta in resolved {
             if let index = items.firstIndex(where: { $0.path == meta.path }) {
                 items[index].subtitle = meta.identifier
