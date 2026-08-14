@@ -1,0 +1,12 @@
+{
+  "/Users/jason/Documents/BQTools/bad_query/bad_queryApp.swift" : {
+    "abi-baseline-json" : "/Users/jason/Documents/BQTools/build/DerivedData-Release/Build/Intermediates.noindex/Jade.build/Release-iphoneos/Jade.build/Objects-normal/arm64/Jade.abi.json",
+    "const-values" : "/Users/jason/Documents/BQTools/build/DerivedData-Release/Build/Intermediates.noindex/Jade.build/Release-iphoneos/Jade.build/Objects-normal/arm64/Jade-primary.swiftconstvalues",
+    "dependencies" : "/Users/jason/Documents/BQTools/build/DerivedData-Release/Build/Intermediates.noindex/Jade.build/Release-iphoneos/Jade.build/Objects-normal/arm64/Jade-primary.d",
+    "diagnostics" : "/Users/jason/Documents/BQTools/build/DerivedData-Release/Build/Intermediates.noindex/Jade.build/Release-iphoneos/Jade.build/Objects-normal/arm64/Jade-primary.dia",
+    "objc-header" : "/Users/jason/Documents/BQTools/build/DerivedData-Release/Build/Intermediates.noindex/Jade.build/Release-iphoneos/Jade.build/Objects-normal/arm64/Jade-Swift.h",
+    "swiftdoc" : "/Users/jason/Documents/BQTools/build/DerivedData-Release/Build/Intermediates.noindex/Jade.build/Release-iphoneos/Jade.build/Objects-normal/arm64/Jade.swiftdoc",
+    "swiftmodule" : "/Users/jason/Documents/BQTools/build/DerivedData-Release/Build/Intermediates.noindex/Jade.build/Release-iphoneos/Jade.build/Objects-normal/arm64/Jade.swiftmodule",
+    "swiftsourceinfo" : "/Users/jason/Documents/BQTools/build/DerivedData-Release/Build/Intermediates.noindex/Jade.build/Release-iphoneos/Jade.build/Objects-normal/arm64/Jade.swiftsourceinfo"
+  }
+}

@@ -1,0 +1,632 @@
+{
+  "source": "/Users/jason/Documents/BQTools/bad_query/BQMobileGestaltView.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "MobileGestalt",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 32
+        }
+      },
+      {
+        "comment": "",
+        "key": "MobileGestalt Editor",
+        "location": {
+          "startingColumn": 31,
+          "startingLine": 19
+        }
+      },
+      {
+        "comment": "",
+        "key": "Load MobileGestalt",
+        "location": {
+          "startingColumn": 32,
+          "startingLine": 23
+        }
+      },
+      {
+        "comment": "",
+        "key": "Reload",
+        "location": {
+          "startingColumn": 39,
+          "startingLine": 41
+        }
+      },
+      {
+        "comment": "",
+        "key": "Refresh Extension",
+        "location": {
+          "startingColumn": 39,
+          "startingLine": 46
+        }
+      },
+      {
+        "comment": "",
+        "key": "Warning",
+        "location": {
+          "startingColumn": 27,
+          "startingLine": 98
+        }
+      },
+      {
+        "comment": "",
+        "key": "Rebooting now might cause a bootloop. Try 'Revert Tweaks'.",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 100
+        }
+      },
+      {
+        "comment": "",
+        "key": "Apply Tweaks",
+        "location": {
+          "startingColumn": 27,
+          "startingLine": 109
+        }
+      },
+      {
+        "comment": "",
+        "key": "Revert Tweaks",
+        "location": {
+          "startingColumn": 27,
+          "startingLine": 116
+        }
+      },
+      {
+        "comment": "",
+        "key": "**WARNING:** These tweaks can break features or softbrick your device!",
+        "location": {
+          "startingColumn": 22,
+          "startingLine": 119
+        }
+      },
+      {
+        "comment": "",
+        "key": "Custom Device Name",
+        "location": {
+          "startingColumn": 24,
+          "startingLine": 149
+        }
+      },
+      {
+        "comment": "",
+        "key": "Device Name",
+        "location": {
+          "startingColumn": 31,
+          "startingLine": 152
+        }
+      },
+      {
+        "comment": "",
+        "key": "Original (%lld)",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 125
+        }
+      },
+      {
+        "comment": "",
+        "key": "Disable Dynamic Island",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 127
+        }
+      },
+      {
+        "comment": "",
+        "key": "iPhone 14 Pro",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 129
+        }
+      },
+      {
+        "comment": "",
+        "key": "iPhone 14 Pro Max",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 130
+        }
+      },
+      {
+        "comment": "",
+        "key": "iPhone 15 Pro Max",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 131
+        }
+      },
+      {
+        "comment": "",
+        "key": "iPhone 16 Pro",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 133
+        }
+      },
+      {
+        "comment": "",
+        "key": "iPhone 16 Pro Max",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 134
+        }
+      },
+      {
+        "comment": "",
+        "key": "iPhone Air",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 137
+        }
+      },
+      {
+        "comment": "",
+        "key": "iPhone X Gestures",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 140
+        }
+      },
+      {
+        "comment": "",
+        "key": "Subtype",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 144
+        }
+      },
+      {
+        "comment": "",
+        "key": "Device Artwork",
+        "location": {
+          "startingColumn": 23,
+          "startingLine": 158
+        }
+      },
+      {
+        "comment": "",
+        "key": "Software Features",
+        "location": {
+          "startingColumn": 23,
+          "startingLine": 170
+        }
+      },
+      {
+        "comment": "",
+        "key": "Hardware Features",
+        "location": {
+          "startingColumn": 23,
+          "startingLine": 183
+        }
+      },
+      {
+        "comment": "",
+        "key": "Spoofing",
+        "location": {
+          "startingColumn": 28,
+          "startingLine": 206
+        }
+      },
+      {
+        "comment": "",
+        "key": "Default",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 207
+        }
+      },
+      {
+        "comment": "",
+        "key": "iPad Pro 11\" (M4)",
+        "location": {
+          "startingColumn": 38,
+          "startingLine": 210
+        }
+      },
+      {
+        "comment": "",
+        "key": "iPad Pro 11\" (M4, Cellular)",
+        "location": {
+          "startingColumn": 38,
+          "startingLine": 211
+        }
+      },
+      {
+        "comment": "",
+        "key": "iPad Pro 11\" (4th Gen)",
+        "location": {
+          "startingColumn": 34,
+          "startingLine": 213
+        }
+      },
+      {
+        "comment": "",
+        "key": "iPad Pro 11\" (4th Gen, Cellular)",
+        "location": {
+          "startingColumn": 34,
+          "startingLine": 214
+        }
+      },
+      {
+        "comment": "",
+        "key": "iPhone 15 Pro",
+        "location": {
+          "startingColumn": 34,
+          "startingLine": 216
+        }
+      },
+      {
+        "comment": "",
+        "key": "iPhone 15 Pro Max",
+        "location": {
+          "startingColumn": 34,
+          "startingLine": 217
+        }
+      },
+      {
+        "comment": "",
+        "key": "iPhone 16",
+        "location": {
+          "startingColumn": 38,
+          "startingLine": 219
+        }
+      },
+      {
+        "comment": "",
+        "key": "iPhone 16 Plus",
+        "location": {
+          "startingColumn": 38,
+          "startingLine": 220
+        }
+      },
+      {
+        "comment": "",
+        "key": "iPhone 16 Pro",
+        "location": {
+          "startingColumn": 38,
+          "startingLine": 221
+        }
+      },
+      {
+        "comment": "",
+        "key": "iPhone 16 Pro Max",
+        "location": {
+          "startingColumn": 38,
+          "startingLine": 222
+        }
+      },
+      {
+        "comment": "",
+        "key": "iPhone 17",
+        "location": {
+          "startingColumn": 38,
+          "startingLine": 225
+        }
+      },
+      {
+        "comment": "",
+        "key": "iPhone 17 Pro",
+        "location": {
+          "startingColumn": 38,
+          "startingLine": 226
+        }
+      },
+      {
+        "comment": "",
+        "key": "iPhone 17 Pro Max",
+        "location": {
+          "startingColumn": 38,
+          "startingLine": 227
+        }
+      },
+      {
+        "comment": "",
+        "key": "iPhone Air",
+        "location": {
+          "startingColumn": 38,
+          "startingLine": 228
+        }
+      },
+      {
+        "comment": "",
+        "key": "Eligibility",
+        "location": {
+          "startingColumn": 23,
+          "startingLine": 234
+        }
+      },
+      {
+        "comment": "",
+        "key": "iPadOS Features",
+        "location": {
+          "startingColumn": 23,
+          "startingLine": 256
+        }
+      },
+      {
+        "comment": "",
+        "key": "Internal",
+        "location": {
+          "startingColumn": 23,
+          "startingLine": 265
+        }
+      },
+      {
+        "comment": "",
+        "key": "Advanced Field Editor",
+        "location": {
+          "startingColumn": 27,
+          "startingLine": 273
+        }
+      },
+      {
+        "comment": "",
+        "key": "Advanced",
+        "location": {
+          "startingColumn": 23,
+          "startingLine": 276
+        }
+      },
+      {
+        "comment": "",
+        "key": "Sandbox Extension",
+        "location": {
+          "startingColumn": 27,
+          "startingLine": 282
+        }
+      },
+      {
+        "comment": "",
+        "key": "Active",
+        "location": {
+          "startingColumn": 47,
+          "startingLine": 284
+        }
+      },
+      {
+        "comment": "",
+        "key": "None",
+        "location": {
+          "startingColumn": 58,
+          "startingLine": 284
+        }
+      },
+      {
+        "comment": "",
+        "key": "Gestalt Path",
+        "location": {
+          "startingColumn": 27,
+          "startingLine": 289
+        }
+      },
+      {
+        "comment": "",
+        "key": "View Logs",
+        "location": {
+          "startingColumn": 27,
+          "startingLine": 300
+        }
+      },
+      {
+        "comment": "",
+        "key": "Session",
+        "location": {
+          "startingColumn": 22,
+          "startingLine": 303
+        }
+      },
+      {
+        "comment": "",
+        "key": "Advanced Field Editor",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 455
+        }
+      },
+      {
+        "comment": "",
+        "key": "Search key or value",
+        "location": {
+          "startingColumn": 48,
+          "startingLine": 456
+        }
+      },
+      {
+        "comment": "",
+        "key": "Add CacheExtra Field",
+        "location": {
+          "startingColumn": 37,
+          "startingLine": 464
+        }
+      },
+      {
+        "comment": "",
+        "key": "Save",
+        "location": {
+          "startingColumn": 24,
+          "startingLine": 467
+        }
+      },
+      {
+        "comment": "",
+        "key": "Edit Field",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 641
+        }
+      },
+      {
+        "comment": "",
+        "key": "Key",
+        "location": {
+          "startingColumn": 25,
+          "startingLine": 602
+        }
+      },
+      {
+        "comment": "",
+        "key": "Value",
+        "location": {
+          "startingColumn": 25,
+          "startingLine": 608
+        }
+      },
+      {
+        "comment": "",
+        "key": "Type",
+        "location": {
+          "startingColumn": 32,
+          "startingLine": 614
+        }
+      },
+      {
+        "comment": "",
+        "key": "Enabled",
+        "location": {
+          "startingColumn": 36,
+          "startingLine": 621
+        }
+      },
+      {
+        "comment": "",
+        "key": "Value",
+        "location": {
+          "startingColumn": 39,
+          "startingLine": 623
+        }
+      },
+      {
+        "comment": "",
+        "key": "Value",
+        "location": {
+          "startingColumn": 39,
+          "startingLine": 626
+        }
+      },
+      {
+        "comment": "",
+        "key": "Delete Field",
+        "location": {
+          "startingColumn": 32,
+          "startingLine": 634
+        }
+      },
+      {
+        "comment": "",
+        "key": "Cancel",
+        "location": {
+          "startingColumn": 28,
+          "startingLine": 645
+        }
+      },
+      {
+        "comment": "",
+        "key": "Save",
+        "location": {
+          "startingColumn": 28,
+          "startingLine": 648
+        }
+      },
+      {
+        "comment": "",
+        "key": "Add CacheExtra Field",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 746
+        }
+      },
+      {
+        "comment": "",
+        "key": "Error",
+        "location": {
+          "startingColumn": 20,
+          "startingLine": 756
+        }
+      },
+      {
+        "comment": "",
+        "key": "Key",
+        "location": {
+          "startingColumn": 25,
+          "startingLine": 721
+        }
+      },
+      {
+        "comment": "",
+        "key": "Value",
+        "location": {
+          "startingColumn": 25,
+          "startingLine": 728
+        }
+      },
+      {
+        "comment": "",
+        "key": "Key",
+        "location": {
+          "startingColumn": 31,
+          "startingLine": 722
+        }
+      },
+      {
+        "comment": "",
+        "key": "Type",
+        "location": {
+          "startingColumn": 28,
+          "startingLine": 729
+        }
+      },
+      {
+        "comment": "",
+        "key": "Enabled",
+        "location": {
+          "startingColumn": 32,
+          "startingLine": 736
+        }
+      },
+      {
+        "comment": "",
+        "key": "Value",
+        "location": {
+          "startingColumn": 35,
+          "startingLine": 738
+        }
+      },
+      {
+        "comment": "",
+        "key": "Value",
+        "location": {
+          "startingColumn": 35,
+          "startingLine": 741
+        }
+      },
+      {
+        "comment": "",
+        "key": "Cancel",
+        "location": {
+          "startingColumn": 28,
+          "startingLine": 750
+        }
+      },
+      {
+        "comment": "",
+        "key": "Add",
+        "location": {
+          "startingColumn": 28,
+          "startingLine": 753
+        }
+      },
+      {
+        "comment": "",
+        "key": "OK",
+        "location": {
+          "startingColumn": 24,
+          "startingLine": 757
+        }
+      }
+    ]
+  },
+  "version": 1
+}

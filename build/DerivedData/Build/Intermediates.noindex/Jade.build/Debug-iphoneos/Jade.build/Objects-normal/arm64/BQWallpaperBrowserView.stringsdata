@@ -1,0 +1,72 @@
+{
+  "source": "/Users/jason/Documents/BQTools/bad_query/BQWallpaperBrowserView.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "Browse Wallpapers",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 67
+        }
+      },
+      {
+        "comment": "",
+        "key": "Search wallpapers",
+        "location": {
+          "startingColumn": 48,
+          "startingLine": 68
+        }
+      },
+      {
+        "comment": "",
+        "key": "No Wallpapers",
+        "location": {
+          "startingColumn": 25,
+          "startingLine": 51
+        }
+      },
+      {
+        "comment": "",
+        "key": "Done (%lld)",
+        "location": {
+          "startingColumn": 28,
+          "startingLine": 72
+        }
+      },
+      {
+        "comment": "",
+        "key": "Downloaded",
+        "location": {
+          "startingColumn": 37,
+          "startingLine": 169
+        }
+      },
+      {
+        "comment": "",
+        "key": "Downloading",
+        "location": {
+          "startingColumn": 69,
+          "startingLine": 169
+        }
+      },
+      {
+        "comment": "",
+        "key": "Download",
+        "location": {
+          "startingColumn": 85,
+          "startingLine": 169
+        }
+      },
+      {
+        "comment": "",
+        "key": "Type",
+        "location": {
+          "startingColumn": 16,
+          "startingLine": 268
+        }
+      }
+    ]
+  },
+  "version": 1
+}

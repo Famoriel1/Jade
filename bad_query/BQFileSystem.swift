@@ -149,20 +149,19 @@ final class BQFileSystemModel {
     var maxInode: Int64 = 300_000
     var activeExtensions: [String: Int64] = [:]
 
-    var extensionCount: Int { activeExtensions.count }
+    /// Includes MHA leases cached in the ObjC layer (BQMCMIntegration).
+    var extensionCount: Int { activeExtensions.count + Int(BQMCMActiveLeaseCount()) }
 
     /// When true, app-data containers are accessed via MobileHouseArrest (class 2)
-    /// instead of the path-traversal route. Only effective when the app's bundle
-    /// identifier is com.apple.mobile.MobileHouseArrest.
-    var useMHAHelper = false
+    /// instead of the path-traversal route. Only effective when the app's signed
+    /// code identifier is com.apple.mobile.MobileHouseArrest.
+    var useMHAHelper: Bool = BQFileSystemModel.isMobileHouseArrest
 
-    /// MHA extensions keyed by container root path. Values are object pointers
-    /// that must be released via bad_query_mha_release (not bad_query_release).
-    var mhaExtensions: [String: Int64] = [:]
-
-    static var isMobileHouseArrest: Bool {
-        Bundle.main.bundleIdentifier == "com.apple.mobile.MobileHouseArrest"
-    }
+    /// True iff the process signed-code-identifier equals the MHA identity.
+    /// Uses SecTaskCopySigningIdentifier (not Bundle.main.bundleIdentifier),
+    /// which is what containermanagerd actually checks — a dev-signed app with
+    /// the right bundle ID but wrong CodeDirectory identifier is rejected.
+    static var isMobileHouseArrest: Bool { BQMCMIsMobileHouseArrest() }
 
     /// App Group owned by this app, used as the "sacrifice" route on iOS 26.
     nonisolated static let appGroupIdentifier = "group.com.jason.bqtools"
@@ -245,6 +244,21 @@ final class BQFileSystemModel {
         "/var/containers/Shared/SystemGroup",
     ]
 
+    /// Maps container root path prefix → (MCM container class, isGroup).
+    /// Covers all container types MHA can resolve. Used by ensureMHAExtension
+    /// to route activation by path, and by mhaEnumerateContainers to pick the
+    /// right class for identifier enumeration.
+    private static let containerClassMap: [(prefix: String, containerClass: UInt64, group: Bool)] = [
+        ("/var/mobile/Containers/Data/Application", 2, false),
+        ("/var/mobile/Containers/Shared/AppGroup", 7, true),
+        ("/var/mobile/Containers/Data/PluginKitPlugin", 4, false),
+        ("/var/mobile/Containers/Data/VPNPlugin", 6, false),
+        ("/var/mobile/Containers/Data/InternalDaemon", 10, false),
+        ("/var/containers/Data/System", 12, false),
+        ("/var/containers/Shared/SystemGroup", 13, true),
+        ("/var/mobile/Containers/Data/Protected", 15, false),
+    ]
+
     private static let logFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.dateFormat = "HH:mm:ss"
@@ -260,9 +274,11 @@ final class BQFileSystemModel {
 
     @discardableResult
     func ensureExtension(for path: String, allowMHA: Bool = true, force: Bool = false) -> Int64 {
-        // Try MHA route first when enabled (and not opted out by caller)
-        if allowMHA, useMHAHelper, let mhaHandle = ensureMHAExtension(for: path) {
-            return mhaHandle
+        // Try MHA route first when enabled (and not opted out by caller).
+        // MHA leases are cached in the ObjC layer (BQMCMIntegration), so a
+        // repeat call for the same container is a cheap dictionary lookup.
+        if allowMHA, useMHAHelper, ensureMHAExtension(for: path) {
+            return 1  // MHA success sentinel — path is sandbox-extended via lease
         }
 
         // bad_query's path-traversal extension is per-path (not recursive).
@@ -300,68 +316,79 @@ final class BQFileSystemModel {
         return handle
     }
 
-    /// Try to activate an MHA extension for a path inside an app-data container.
-    /// Returns the object handle if an MHA extension is (already) active, nil otherwise.
-    private func ensureMHAExtension(for path: String) -> Int64? {
-        let appPrefix = "/var/mobile/Containers/Data/Application/"
-        guard path.hasPrefix(appPrefix) else { return nil }
+    /// Try to activate an MHA lease for the container that contains `path`.
+    /// Handles all container classes (2/4/6/7/10/12/13/15), not just app data.
+    /// Returns true if the container root is now sandbox-extended (either
+    /// freshly activated or already cached in the ObjC layer).
+    ///
+    /// The container class is determined from the path prefix via
+    /// containerClassMap. The identifier (bundle ID / group ID) is read from
+    /// the container's MCM metadata plist. Leases are cached by (class,
+    /// identifier) in BQMCMIntegration, so a repeat call for the same
+    /// container is a cheap dictionary lookup.
+    private func ensureMHAExtension(for path: String) -> Bool {
+        // Normalize /private/var/... → /var/... for prefix matching.
+        // MCM returns /private/... paths, but the codebase uses /var/...
+        let normalizedPath = path.hasPrefix("/private/var/")
+            ? String(path.dropFirst("/private".count)) : path
 
-        // Extract the container root (UUID immediately after the prefix)
-        let rest = String(path.dropFirst(appPrefix.count))
-        let uuid = rest.split(separator: "/").first.map(String.init) ?? rest
-        let containerRoot = appPrefix + uuid
+        // Find which container type this path belongs to
+        for (prefix, containerClass, group) in Self.containerClassMap {
+            let prefixWithSlash = prefix + "/"
+            guard normalizedPath == prefix || normalizedPath.hasPrefix(prefixWithSlash) else {
+                continue
+            }
+            // For the root itself, MHA can't activate (no single identifier).
+            // Container roots are handled by mhaEnumerateContainers instead.
+            if normalizedPath == prefix { return false }
 
-        // Already have an MHA extension for this container?
-        if let existing = mhaExtensions[containerRoot] {
-            return existing > 0 ? existing : nil
+            // Extract the container root (UUID immediately after the prefix)
+            let rest = String(normalizedPath.dropFirst(prefixWithSlash.count))
+            let uuid = rest.split(separator: "/").first.map(String.init) ?? rest
+            let containerRoot = prefixWithSlash + uuid
+
+            // Fast path: a lease for this root is already active.
+            if BQMCMPathHasActiveLease(containerRoot) { return true }
+
+            // Read the container metadata to resolve the identifier
+            let metaPath = containerRoot + "/.com.apple.mobile_container_manager.metadata.plist"
+            guard let data = FileManager.default.contents(atPath: metaPath),
+                  let plist = (try? PropertyListSerialization.propertyList(from: data, options: [], format: nil)) as? [String: Any],
+                  let identifier = plist["MCMMetadataIdentifier"] as? String,
+                  BQMCMSafeIdentifier(identifier)
+            else { return false }
+
+            var error: NSString?
+            let resolvedRoot = BQMCMActivate(containerClass, identifier, group, &error)
+            if let resolvedRoot {
+                appendLog("MHA lease active (class \(containerClass)) for \(identifier) → \(resolvedRoot)")
+                statusMessage = "MHA: \(identifier)"
+                return true
+            } else {
+                let reason = error.map { String($0) } ?? "unknown"
+                appendLog("MHA failed (class \(containerClass)) for \(identifier): \(reason)")
+                return false
+            }
         }
-
-        // Read the container metadata to resolve the bundle ID
-        let metaPath = containerRoot + "/.com.apple.mobile_container_manager.metadata.plist"
-        guard let data = FileManager.default.contents(atPath: metaPath),
-              let plist = (try? PropertyListSerialization.propertyList(from: data, options: [], format: nil)) as? [String: Any],
-              let bundleId = plist["MCMMetadataIdentifier"] as? String
-        else {
-            mhaExtensions[containerRoot] = -1  // cache the failure
-            return nil
-        }
-
-        // Query the container via MHA (class 2)
-        var pathBuf = [CChar](repeating: 0, count: 1024)
-        let handle = bundleId.withCString { ptr in
-            bad_query_mha(ptr, &pathBuf, 1024)
-        }
-
-        if handle > 0 {
-            mhaExtensions[containerRoot] = handle
-            let resolvedRoot = String(cString: pathBuf)
-            appendLog("MHA extension active for \(bundleId) → \(resolvedRoot)")
-            statusMessage = "MHA: \(bundleId)"
-            return handle
-        } else {
-            mhaExtensions[containerRoot] = -1
-            appendLog("MHA failed (\(handle)) for \(bundleId)")
-            return nil
-        }
+        return false
     }
 
     func releaseAllExtensions() {
-        let count = activeExtensions.count + mhaExtensions.values.filter { $0 > 0 }.count
+        let badQueryCount = activeExtensions.count
         for (_, handle) in activeExtensions {
             bad_query_release(handle)
         }
         activeExtensions.removeAll()
 
-        for (_, handle) in mhaExtensions where handle > 0 {
-            bad_query_mha_release(handle)
-        }
-        mhaExtensions.removeAll()
+        let mhaCount = Int(BQMCMActiveLeaseCount())
+        BQMCMReleaseAllLeases()
+
         // Clear scan caches so the next visit does a fresh scan (user explicitly
         // released everything, likely to pick up newly installed apps).
         inodeScanCache.removeAll()
         inodeRangeCache.removeAll()
         containerBundleCache.removeAll()
-        appendLog("released \(count) extension(s)")
+        appendLog("released \(badQueryCount + mhaCount) extension(s)")
         statusMessage = "All sandbox extensions released"
     }
 

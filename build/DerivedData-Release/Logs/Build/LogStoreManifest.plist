@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>logFormatVersion</key>
+	<integer>13</integer>
+	<key>logs</key>
+	<dict>
+		<key>D5D27D20-7582-4638-843E-E9038DB8D634</key>
+		<dict>
+			<key>className</key>
+			<string>IDECommandLineBuildLog</string>
+			<key>documentTypeString</key>
+			<string>&lt;nil&gt;</string>
+			<key>domainType</key>
+			<string>Xcode.IDEActivityLogDomainType.BuildLog</string>
+			<key>fileName</key>
+			<string>D5D27D20-7582-4638-843E-E9038DB8D634.xcactivitylog</string>
+			<key>hasPrimaryLog</key>
+			<true/>
+			<key>primaryObservable</key>
+			<dict>
+				<key>highLevelStatus</key>
+				<string>E</string>
+				<key>totalNumberOfAnalyzerIssues</key>
+				<integer>0</integer>
+				<key>totalNumberOfErrors</key>
+				<integer>336</integer>
+				<key>totalNumberOfTestFailures</key>
+				<integer>0</integer>
+				<key>totalNumberOfWarnings</key>
+				<integer>64</integer>
+			</dict>
+			<key>schemeIdentifier-containerName</key>
+			<string>Jade project</string>
+			<key>schemeIdentifier-schemeName</key>
+			<string>Jade</string>
+			<key>schemeIdentifier-sharedScheme</key>
+			<integer>1</integer>
+			<key>signature</key>
+			<string>Building project Jade with scheme Jade and configuration Release</string>
+			<key>timeStartedRecording</key>
+			<real>808396237.29501295</real>
+			<key>timeStoppedRecording</key>
+			<real>808396264.97724104</real>
+			<key>title</key>
+			<string>Building project Jade with scheme Jade and configuration Release</string>
+			<key>uniqueIdentifier</key>
+			<string>D5D27D20-7582-4638-843E-E9038DB8D634</string>
+		</dict>
+	</dict>
+</dict>
+</plist>

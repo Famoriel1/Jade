@@ -1,0 +1,160 @@
+{
+  "source": "/Users/jason/Documents/BQTools/bad_query/BQRootView.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "Error",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 31
+        }
+      },
+      {
+        "comment": "",
+        "key": "Jade",
+        "location": {
+          "startingColumn": 34,
+          "startingLine": 107
+        }
+      },
+      {
+        "comment": "",
+        "key": "Session",
+        "location": {
+          "startingColumn": 29,
+          "startingLine": 54
+        }
+      },
+      {
+        "comment": "",
+        "key": "File browsing",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 49
+        }
+      },
+      {
+        "comment": "",
+        "key": "iOS 26 needs the App Group sacrifice route for App Groups; iOS 27 reaches System containers directly.",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 51
+        }
+      },
+      {
+        "comment": "",
+        "key": "%lld",
+        "location": {
+          "startingColumn": 34,
+          "startingLine": 58
+        }
+      },
+      {
+        "comment": "",
+        "key": "Active Extensions",
+        "location": {
+          "startingColumn": 35,
+          "startingLine": 56
+        }
+      },
+      {
+        "comment": "",
+        "key": "Use MobileHouseArrest",
+        "location": {
+          "startingColumn": 39,
+          "startingLine": 64
+        }
+      },
+      {
+        "comment": "",
+        "key": "Activity Log",
+        "location": {
+          "startingColumn": 35,
+          "startingLine": 73
+        }
+      },
+      {
+        "comment": "",
+        "key": "Release All Extensions",
+        "location": {
+          "startingColumn": 35,
+          "startingLine": 78
+        }
+      },
+      {
+        "comment": "",
+        "key": "Get Reboot Shortcut",
+        "location": {
+          "startingColumn": 35,
+          "startingLine": 84
+        }
+      },
+      {
+        "comment": "",
+        "key": "Respring",
+        "location": {
+          "startingColumn": 35,
+          "startingLine": 89
+        }
+      },
+      {
+        "comment": "",
+        "key": "Reboot",
+        "location": {
+          "startingColumn": 35,
+          "startingLine": 94
+        }
+      },
+      {
+        "comment": "",
+        "key": "File",
+        "location": {
+          "startingColumn": 23,
+          "startingLine": 124
+        }
+      },
+      {
+        "comment": "",
+        "key": "Apps",
+        "location": {
+          "startingColumn": 23,
+          "startingLine": 131
+        }
+      },
+      {
+        "comment": "",
+        "key": "Gestalt",
+        "location": {
+          "startingColumn": 23,
+          "startingLine": 138
+        }
+      },
+      {
+        "comment": "",
+        "key": "Poster",
+        "location": {
+          "startingColumn": 23,
+          "startingLine": 144
+        }
+      },
+      {
+        "comment": "",
+        "key": "Activity Log",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 176
+        }
+      },
+      {
+        "comment": "",
+        "key": "Done",
+        "location": {
+          "startingColumn": 28,
+          "startingLine": 180
+        }
+      }
+    ]
+  },
+  "version": 1
+}

@@ -1,0 +1,23 @@
+{
+  "/Users/jason/Documents/BQTools/bad_query/BQAppListView.swift" : {
+    "const-values" : "/Users/jason/Documents/BQTools/build/DerivedData/Build/Intermediates.noindex/Jade.build/Debug-iphoneos/Jade.build/Objects-normal/arm64/BQAppListView.swiftconstvalues",
+    "dependencies" : "/Users/jason/Documents/BQTools/build/DerivedData/Build/Intermediates.noindex/Jade.build/Debug-iphoneos/Jade.build/Objects-normal/arm64/BQAppListView.d",
+    "diagnostics" : "/Users/jason/Documents/BQTools/build/DerivedData/Build/Intermediates.noindex/Jade.build/Debug-iphoneos/Jade.build/Objects-normal/arm64/BQAppListView.dia",
+    "object" : "/Users/jason/Documents/BQTools/build/DerivedData/Build/Intermediates.noindex/Jade.build/Debug-iphoneos/Jade.build/Objects-normal/arm64/BQAppListView.o",
+    "swift-dependencies" : "/Users/jason/Documents/BQTools/build/DerivedData/Build/Intermediates.noindex/Jade.build/Debug-iphoneos/Jade.build/Objects-normal/arm64/BQAppListView.swiftdeps"
+  },
+  "/Users/jason/Documents/BQTools/bad_query/BQDirectoryView.swift" : {
+    "const-values" : "/Users/jason/Documents/BQTools/build/DerivedData/Build/Intermediates.noindex/Jade.build/Debug-iphoneos/Jade.build/Objects-normal/arm64/BQDirectoryView.swiftconstvalues",
+    "dependencies" : "/Users/jason/Documents/BQTools/build/DerivedData/Build/Intermediates.noindex/Jade.build/Debug-iphoneos/Jade.build/Objects-normal/arm64/BQDirectoryView.d",
+    "diagnostics" : "/Users/jason/Documents/BQTools/build/DerivedData/Build/Intermediates.noindex/Jade.build/Debug-iphoneos/Jade.build/Objects-normal/arm64/BQDirectoryView.dia",
+    "object" : "/Users/jason/Documents/BQTools/build/DerivedData/Build/Intermediates.noindex/Jade.build/Debug-iphoneos/Jade.build/Objects-normal/arm64/BQDirectoryView.o",
+    "swift-dependencies" : "/Users/jason/Documents/BQTools/build/DerivedData/Build/Intermediates.noindex/Jade.build/Debug-iphoneos/Jade.build/Objects-normal/arm64/BQDirectoryView.swiftdeps"
+  },
+  "/Users/jason/Documents/BQTools/bad_query/bad_queryApp.swift" : {
+    "const-values" : "/Users/jason/Documents/BQTools/build/DerivedData/Build/Intermediates.noindex/Jade.build/Debug-iphoneos/Jade.build/Objects-normal/arm64/bad_queryApp.swiftconstvalues",
+    "dependencies" : "/Users/jason/Documents/BQTools/build/DerivedData/Build/Intermediates.noindex/Jade.build/Debug-iphoneos/Jade.build/Objects-normal/arm64/bad_queryApp.d",
+    "diagnostics" : "/Users/jason/Documents/BQTools/build/DerivedData/Build/Intermediates.noindex/Jade.build/Debug-iphoneos/Jade.build/Objects-normal/arm64/bad_queryApp.dia",
+    "object" : "/Users/jason/Documents/BQTools/build/DerivedData/Build/Intermediates.noindex/Jade.build/Debug-iphoneos/Jade.build/Objects-normal/arm64/bad_queryApp.o",
+    "swift-dependencies" : "/Users/jason/Documents/BQTools/build/DerivedData/Build/Intermediates.noindex/Jade.build/Debug-iphoneos/Jade.build/Objects-normal/arm64/bad_queryApp.swiftdeps"
+  }
+}

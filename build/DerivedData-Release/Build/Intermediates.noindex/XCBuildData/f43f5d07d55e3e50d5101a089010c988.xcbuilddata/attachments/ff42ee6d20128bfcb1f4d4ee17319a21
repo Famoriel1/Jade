@@ -1,0 +1,86 @@
+{
+  "" : {
+    "const-values" : "/Users/jason/Documents/BQTools/build/DerivedData-Release/Build/Intermediates.noindex/Jade.build/Release-iphoneos/Jade.build/Objects-normal/arm64/Jade-primary.swiftconstvalues",
+    "dependencies" : "/Users/jason/Documents/BQTools/build/DerivedData-Release/Build/Intermediates.noindex/Jade.build/Release-iphoneos/Jade.build/Objects-normal/arm64/Jade-primary.d",
+    "diagnostics" : "/Users/jason/Documents/BQTools/build/DerivedData-Release/Build/Intermediates.noindex/Jade.build/Release-iphoneos/Jade.build/Objects-normal/arm64/Jade-primary.dia",
+    "emit-module-dependencies" : "/Users/jason/Documents/BQTools/build/DerivedData-Release/Build/Intermediates.noindex/Jade.build/Release-iphoneos/Jade.build/Objects-normal/arm64/Jade-primary-emit-module.d",
+    "emit-module-diagnostics" : "/Users/jason/Documents/BQTools/build/DerivedData-Release/Build/Intermediates.noindex/Jade.build/Release-iphoneos/Jade.build/Objects-normal/arm64/Jade-primary-emit-module.dia",
+    "pch" : "/Users/jason/Documents/BQTools/build/DerivedData-Release/Build/Intermediates.noindex/Jade.build/Release-iphoneos/Jade.build/Objects-normal/arm64/Jade-primary-Bridging-header.pch",
+    "swift-dependencies" : "/Users/jason/Documents/BQTools/build/DerivedData-Release/Build/Intermediates.noindex/Jade.build/Release-iphoneos/Jade.build/Objects-normal/arm64/Jade-primary.swiftdeps"
+  },
+  "/Users/jason/Documents/BQTools/bad_query/BQAppListView.swift" : {
+    "index-unit-output-path" : "/Jade.build/Release-iphoneos/Jade.build/Objects-normal/arm64/BQAppListView.o",
+    "llvm-bc" : "/Users/jason/Documents/BQTools/build/DerivedData-Release/Build/Intermediates.noindex/Jade.build/Release-iphoneos/Jade.build/Objects-normal/arm64/BQAppListView.bc",
+    "object" : "/Users/jason/Documents/BQTools/build/DerivedData-Release/Build/Intermediates.noindex/Jade.build/Release-iphoneos/Jade.build/Objects-normal/arm64/BQAppListView.o"
+  },
+  "/Users/jason/Documents/BQTools/bad_query/BQDirectoryView.swift" : {
+    "index-unit-output-path" : "/Jade.build/Release-iphoneos/Jade.build/Objects-normal/arm64/BQDirectoryView.o",
+    "llvm-bc" : "/Users/jason/Documents/BQTools/build/DerivedData-Release/Build/Intermediates.noindex/Jade.build/Release-iphoneos/Jade.build/Objects-normal/arm64/BQDirectoryView.bc",
+    "object" : "/Users/jason/Documents/BQTools/build/DerivedData-Release/Build/Intermediates.noindex/Jade.build/Release-iphoneos/Jade.build/Objects-normal/arm64/BQDirectoryView.o"
+  },
+  "/Users/jason/Documents/BQTools/bad_query/BQFileSystem.swift" : {
+    "index-unit-output-path" : "/Jade.build/Release-iphoneos/Jade.build/Objects-normal/arm64/BQFileSystem.o",
+    "llvm-bc" : "/Users/jason/Documents/BQTools/build/DerivedData-Release/Build/Intermediates.noindex/Jade.build/Release-iphoneos/Jade.build/Objects-normal/arm64/BQFileSystem.bc",
+    "object" : "/Users/jason/Documents/BQTools/build/DerivedData-Release/Build/Intermediates.noindex/Jade.build/Release-iphoneos/Jade.build/Objects-normal/arm64/BQFileSystem.o"
+  },
+  "/Users/jason/Documents/BQTools/bad_query/BQMobileGestalt.swift" : {
+    "index-unit-output-path" : "/Jade.build/Release-iphoneos/Jade.build/Objects-normal/arm64/BQMobileGestalt.o",
+    "llvm-bc" : "/Users/jason/Documents/BQTools/build/DerivedData-Release/Build/Intermediates.noindex/Jade.build/Release-iphoneos/Jade.build/Objects-normal/arm64/BQMobileGestalt.bc",
+    "object" : "/Users/jason/Documents/BQTools/build/DerivedData-Release/Build/Intermediates.noindex/Jade.build/Release-iphoneos/Jade.build/Objects-normal/arm64/BQMobileGestalt.o"
+  },
+  "/Users/jason/Documents/BQTools/bad_query/BQMobileGestaltView.swift" : {
+    "index-unit-output-path" : "/Jade.build/Release-iphoneos/Jade.build/Objects-normal/arm64/BQMobileGestaltView.o",
+    "llvm-bc" : "/Users/jason/Documents/BQTools/build/DerivedData-Release/Build/Intermediates.noindex/Jade.build/Release-iphoneos/Jade.build/Objects-normal/arm64/BQMobileGestaltView.bc",
+    "object" : "/Users/jason/Documents/BQTools/build/DerivedData-Release/Build/Intermediates.noindex/Jade.build/Release-iphoneos/Jade.build/Objects-normal/arm64/BQMobileGestaltView.o"
+  },
+  "/Users/jason/Documents/BQTools/bad_query/BQPoster.swift" : {
+    "index-unit-output-path" : "/Jade.build/Release-iphoneos/Jade.build/Objects-normal/arm64/BQPoster.o",
+    "llvm-bc" : "/Users/jason/Documents/BQTools/build/DerivedData-Release/Build/Intermediates.noindex/Jade.build/Release-iphoneos/Jade.build/Objects-normal/arm64/BQPoster.bc",
+    "object" : "/Users/jason/Documents/BQTools/build/DerivedData-Release/Build/Intermediates.noindex/Jade.build/Release-iphoneos/Jade.build/Objects-normal/arm64/BQPoster.o"
+  },
+  "/Users/jason/Documents/BQTools/bad_query/BQPosterView.swift" : {
+    "index-unit-output-path" : "/Jade.build/Release-iphoneos/Jade.build/Objects-normal/arm64/BQPosterView.o",
+    "llvm-bc" : "/Users/jason/Documents/BQTools/build/DerivedData-Release/Build/Intermediates.noindex/Jade.build/Release-iphoneos/Jade.build/Objects-normal/arm64/BQPosterView.bc",
+    "object" : "/Users/jason/Documents/BQTools/build/DerivedData-Release/Build/Intermediates.noindex/Jade.build/Release-iphoneos/Jade.build/Objects-normal/arm64/BQPosterView.o"
+  },
+  "/Users/jason/Documents/BQTools/bad_query/BQRootView.swift" : {
+    "index-unit-output-path" : "/Jade.build/Release-iphoneos/Jade.build/Objects-normal/arm64/BQRootView.o",
+    "llvm-bc" : "/Users/jason/Documents/BQTools/build/DerivedData-Release/Build/Intermediates.noindex/Jade.build/Release-iphoneos/Jade.build/Objects-normal/arm64/BQRootView.bc",
+    "object" : "/Users/jason/Documents/BQTools/build/DerivedData-Release/Build/Intermediates.noindex/Jade.build/Release-iphoneos/Jade.build/Objects-normal/arm64/BQRootView.o"
+  },
+  "/Users/jason/Documents/BQTools/bad_query/BQSandboxPoCView.swift" : {
+    "index-unit-output-path" : "/Jade.build/Release-iphoneos/Jade.build/Objects-normal/arm64/BQSandboxPoCView.o",
+    "llvm-bc" : "/Users/jason/Documents/BQTools/build/DerivedData-Release/Build/Intermediates.noindex/Jade.build/Release-iphoneos/Jade.build/Objects-normal/arm64/BQSandboxPoCView.bc",
+    "object" : "/Users/jason/Documents/BQTools/build/DerivedData-Release/Build/Intermediates.noindex/Jade.build/Release-iphoneos/Jade.build/Objects-normal/arm64/BQSandboxPoCView.o"
+  },
+  "/Users/jason/Documents/BQTools/bad_query/BQWallpaperAPI.swift" : {
+    "index-unit-output-path" : "/Jade.build/Release-iphoneos/Jade.build/Objects-normal/arm64/BQWallpaperAPI.o",
+    "llvm-bc" : "/Users/jason/Documents/BQTools/build/DerivedData-Release/Build/Intermediates.noindex/Jade.build/Release-iphoneos/Jade.build/Objects-normal/arm64/BQWallpaperAPI.bc",
+    "object" : "/Users/jason/Documents/BQTools/build/DerivedData-Release/Build/Intermediates.noindex/Jade.build/Release-iphoneos/Jade.build/Objects-normal/arm64/BQWallpaperAPI.o"
+  },
+  "/Users/jason/Documents/BQTools/bad_query/BQWallpaperBrowserView.swift" : {
+    "index-unit-output-path" : "/Jade.build/Release-iphoneos/Jade.build/Objects-normal/arm64/BQWallpaperBrowserView.o",
+    "llvm-bc" : "/Users/jason/Documents/BQTools/build/DerivedData-Release/Build/Intermediates.noindex/Jade.build/Release-iphoneos/Jade.build/Objects-normal/arm64/BQWallpaperBrowserView.bc",
+    "object" : "/Users/jason/Documents/BQTools/build/DerivedData-Release/Build/Intermediates.noindex/Jade.build/Release-iphoneos/Jade.build/Objects-normal/arm64/BQWallpaperBrowserView.o"
+  },
+  "/Users/jason/Documents/BQTools/bad_query/Respring.swift" : {
+    "index-unit-output-path" : "/Jade.build/Release-iphoneos/Jade.build/Objects-normal/arm64/Respring.o",
+    "llvm-bc" : "/Users/jason/Documents/BQTools/build/DerivedData-Release/Build/Intermediates.noindex/Jade.build/Release-iphoneos/Jade.build/Objects-normal/arm64/Respring.bc",
+    "object" : "/Users/jason/Documents/BQTools/build/DerivedData-Release/Build/Intermediates.noindex/Jade.build/Release-iphoneos/Jade.build/Objects-normal/arm64/Respring.o"
+  },
+  "/Users/jason/Documents/BQTools/bad_query/bad_queryApp.swift" : {
+    "index-unit-output-path" : "/Jade.build/Release-iphoneos/Jade.build/Objects-normal/arm64/bad_queryApp.o",
+    "llvm-bc" : "/Users/jason/Documents/BQTools/build/DerivedData-Release/Build/Intermediates.noindex/Jade.build/Release-iphoneos/Jade.build/Objects-normal/arm64/bad_queryApp.bc",
+    "object" : "/Users/jason/Documents/BQTools/build/DerivedData-Release/Build/Intermediates.noindex/Jade.build/Release-iphoneos/Jade.build/Objects-normal/arm64/bad_queryApp.o"
+  },
+  "/Users/jason/Documents/BQTools/bad_query/id2name.swift" : {
+    "index-unit-output-path" : "/Jade.build/Release-iphoneos/Jade.build/Objects-normal/arm64/id2name.o",
+    "llvm-bc" : "/Users/jason/Documents/BQTools/build/DerivedData-Release/Build/Intermediates.noindex/Jade.build/Release-iphoneos/Jade.build/Objects-normal/arm64/id2name.bc",
+    "object" : "/Users/jason/Documents/BQTools/build/DerivedData-Release/Build/Intermediates.noindex/Jade.build/Release-iphoneos/Jade.build/Objects-normal/arm64/id2name.o"
+  },
+  "/Users/jason/Documents/BQTools/build/DerivedData-Release/Build/Intermediates.noindex/Jade.build/Release-iphoneos/Jade.build/DerivedSources/GeneratedAssetSymbols.swift" : {
+    "index-unit-output-path" : "/Jade.build/Release-iphoneos/Jade.build/Objects-normal/arm64/GeneratedAssetSymbols.o",
+    "llvm-bc" : "/Users/jason/Documents/BQTools/build/DerivedData-Release/Build/Intermediates.noindex/Jade.build/Release-iphoneos/Jade.build/Objects-normal/arm64/GeneratedAssetSymbols.bc",
+    "object" : "/Users/jason/Documents/BQTools/build/DerivedData-Release/Build/Intermediates.noindex/Jade.build/Release-iphoneos/Jade.build/Objects-normal/arm64/GeneratedAssetSymbols.o"
+  }
+}

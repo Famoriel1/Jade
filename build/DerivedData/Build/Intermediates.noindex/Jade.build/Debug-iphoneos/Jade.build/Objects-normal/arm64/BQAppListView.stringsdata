@@ -1,0 +1,56 @@
+{
+  "source": "/Users/jason/Documents/BQTools/bad_query/BQAppListView.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "Filter by name or bundle ID",
+        "location": {
+          "startingColumn": 48,
+          "startingLine": 99
+        }
+      },
+      {
+        "comment": "",
+        "key": "Apps",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 100
+        }
+      },
+      {
+        "comment": "",
+        "key": "Resolving app containers…",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 67
+        }
+      },
+      {
+        "comment": "",
+        "key": "No Apps",
+        "location": {
+          "startingColumn": 27,
+          "startingLine": 72
+        }
+      },
+      {
+        "comment": "",
+        "key": "Retry",
+        "location": {
+          "startingColumn": 28,
+          "startingLine": 76
+        }
+      },
+      {
+        "comment": "",
+        "key": "Open",
+        "location": {
+          "startingColumn": 35,
+          "startingLine": 92
+        }
+      }
+    ]
+  },
+  "version": 1
+}

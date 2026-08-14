@@ -25,11 +25,6 @@ struct BQRootView: View {
         @Bindable var model = model
         return TabView {
             NavigationStack {
-                if let name = appName(for: "com.apple.Preferences") {
-                    Text(name)
-                } else {
-                    Text("Error")
-                }
                 List {
                     Section {
                         ForEach(BQFileSystemModel.quickAccess) { entry in
@@ -58,6 +53,14 @@ struct BQRootView: View {
                             Text("\(model.extensionCount)")
                                 .foregroundStyle(.secondary)
                                 .monospacedDigit()
+                        }
+                        if BQFileSystemModel.isMobileHouseArrest {
+                            Toggle(isOn: $model.useMHAHelper) {
+                                Label("Use MobileHouseArrest", systemImage: "lock.open")
+                            }
+                            .onChange(of: model.useMHAHelper) { _, _ in
+                                model.appendLog("MHA helper \(model.useMHAHelper ? "enabled" : "disabled")")
+                            }
                         }
                         Button {
                             showingLog = true

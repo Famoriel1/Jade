@@ -1,0 +1,136 @@
+{
+  "source": "/Users/jason/Documents/BQTools/bad_query/BQSandboxPoCView.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "Sandbox PoC",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 155
+        }
+      },
+      {
+        "comment": "",
+        "key": "Bundle ID",
+        "location": {
+          "startingColumn": 27,
+          "startingLine": 85
+        }
+      },
+      {
+        "comment": "",
+        "key": "Match",
+        "location": {
+          "startingColumn": 27,
+          "startingLine": 94
+        }
+      },
+      {
+        "comment": "",
+        "key": "Yes",
+        "location": {
+          "startingColumn": 66,
+          "startingLine": 96
+        }
+      },
+      {
+        "comment": "",
+        "key": "No",
+        "location": {
+          "startingColumn": 74,
+          "startingLine": 96
+        }
+      },
+      {
+        "comment": "",
+        "key": "Identity",
+        "location": {
+          "startingColumn": 22,
+          "startingLine": 101
+        }
+      },
+      {
+        "comment": "",
+        "key": "Run MobileHouseArrest PoC",
+        "location": {
+          "startingColumn": 31,
+          "startingLine": 110
+        }
+      },
+      {
+        "comment": "",
+        "key": "App-Data Container Escape (Class 2)",
+        "location": {
+          "startingColumn": 23,
+          "startingLine": 126
+        }
+      },
+      {
+        "comment": "",
+        "key": "Queries the app-data containers for com.apple.mobilenotes and com.apple.mobilesafari, activates each sandbox extension, writes a canary file, verifies, and cleans it up.",
+        "location": {
+          "startingColumn": 22,
+          "startingLine": 128
+        }
+      },
+      {
+        "comment": "",
+        "key": "Run MobileGestalt Class-13 PoC",
+        "location": {
+          "startingColumn": 31,
+          "startingLine": 137
+        }
+      },
+      {
+        "comment": "",
+        "key": "System-Group Container Escape (Class 13)",
+        "location": {
+          "startingColumn": 23,
+          "startingLine": 150
+        }
+      },
+      {
+        "comment": "",
+        "key": "Queries the MobileGestalt cache system-group container, verifies the returned path, activates the extension, and checks read-write access to com.apple.MobileGestalt.plist.",
+        "location": {
+          "startingColumn": 22,
+          "startingLine": 152
+        }
+      },
+      {
+        "comment": "",
+        "key": "PASS",
+        "location": {
+          "startingColumn": 34,
+          "startingLine": 170
+        }
+      },
+      {
+        "comment": "",
+        "key": "FAIL",
+        "location": {
+          "startingColumn": 43,
+          "startingLine": 170
+        }
+      },
+      {
+        "comment": "",
+        "key": "Yes",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 221
+        }
+      },
+      {
+        "comment": "",
+        "key": "No",
+        "location": {
+          "startingColumn": 34,
+          "startingLine": 221
+        }
+      }
+    ]
+  },
+  "version": 1
+}

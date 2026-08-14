@@ -47,9 +47,7 @@ final class BQSandboxPoCModel {
     var mgClass13Result: BQPocResult?
     var isRunning = false
 
-    static var isMobileHouseArrest: Bool {
-        Bundle.main.bundleIdentifier == "com.apple.mobile.MobileHouseArrest"
-    }
+    static var isMobileHouseArrest: Bool { BQMCMIsMobileHouseArrest() }
 
     func runMHAPoC() {
         guard !isRunning else { return }

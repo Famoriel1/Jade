@@ -1,0 +1,64 @@
+{
+  "source": "/Users/jason/Documents/BQTools/bad_query/BQPosterView.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "PosterBoard",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 82
+        }
+      },
+      {
+        "comment": "",
+        "key": "Apply",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 38
+        }
+      },
+      {
+        "comment": "",
+        "key": "Reset",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 46
+        }
+      },
+      {
+        "comment": "",
+        "key": "Import Tendies",
+        "location": {
+          "startingColumn": 27,
+          "startingLine": 55
+        }
+      },
+      {
+        "comment": "",
+        "key": "Browse Wallpapers",
+        "location": {
+          "startingColumn": 27,
+          "startingLine": 62
+        }
+      },
+      {
+        "comment": "",
+        "key": "Pick one or more .tendies (or .zip) wallpaper packs, or browse and download from the community library.",
+        "location": {
+          "startingColumn": 22,
+          "startingLine": 66
+        }
+      },
+      {
+        "comment": "",
+        "key": "Imported",
+        "location": {
+          "startingColumn": 27,
+          "startingLine": 78
+        }
+      }
+    ]
+  },
+  "version": 1
+}

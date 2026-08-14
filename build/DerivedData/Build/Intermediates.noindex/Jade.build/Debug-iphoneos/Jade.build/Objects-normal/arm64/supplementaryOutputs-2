@@ -1,0 +1,23 @@
+{
+  "/Users/jason/Documents/BQTools/bad_query/BQFileSystem.swift" : {
+    "const-values" : "/Users/jason/Documents/BQTools/build/DerivedData/Build/Intermediates.noindex/Jade.build/Debug-iphoneos/Jade.build/Objects-normal/arm64/BQFileSystem.swiftconstvalues",
+    "dependencies" : "/Users/jason/Documents/BQTools/build/DerivedData/Build/Intermediates.noindex/Jade.build/Debug-iphoneos/Jade.build/Objects-normal/arm64/BQFileSystem.d",
+    "diagnostics" : "/Users/jason/Documents/BQTools/build/DerivedData/Build/Intermediates.noindex/Jade.build/Debug-iphoneos/Jade.build/Objects-normal/arm64/BQFileSystem.dia",
+    "object" : "/Users/jason/Documents/BQTools/build/DerivedData/Build/Intermediates.noindex/Jade.build/Debug-iphoneos/Jade.build/Objects-normal/arm64/BQFileSystem.o",
+    "swift-dependencies" : "/Users/jason/Documents/BQTools/build/DerivedData/Build/Intermediates.noindex/Jade.build/Debug-iphoneos/Jade.build/Objects-normal/arm64/BQFileSystem.swiftdeps"
+  },
+  "/Users/jason/Documents/BQTools/bad_query/BQMobileGestalt.swift" : {
+    "const-values" : "/Users/jason/Documents/BQTools/build/DerivedData/Build/Intermediates.noindex/Jade.build/Debug-iphoneos/Jade.build/Objects-normal/arm64/BQMobileGestalt.swiftconstvalues",
+    "dependencies" : "/Users/jason/Documents/BQTools/build/DerivedData/Build/Intermediates.noindex/Jade.build/Debug-iphoneos/Jade.build/Objects-normal/arm64/BQMobileGestalt.d",
+    "diagnostics" : "/Users/jason/Documents/BQTools/build/DerivedData/Build/Intermediates.noindex/Jade.build/Debug-iphoneos/Jade.build/Objects-normal/arm64/BQMobileGestalt.dia",
+    "object" : "/Users/jason/Documents/BQTools/build/DerivedData/Build/Intermediates.noindex/Jade.build/Debug-iphoneos/Jade.build/Objects-normal/arm64/BQMobileGestalt.o",
+    "swift-dependencies" : "/Users/jason/Documents/BQTools/build/DerivedData/Build/Intermediates.noindex/Jade.build/Debug-iphoneos/Jade.build/Objects-normal/arm64/BQMobileGestalt.swiftdeps"
+  },
+  "/Users/jason/Documents/BQTools/bad_query/BQMobileGestaltView.swift" : {
+    "const-values" : "/Users/jason/Documents/BQTools/build/DerivedData/Build/Intermediates.noindex/Jade.build/Debug-iphoneos/Jade.build/Objects-normal/arm64/BQMobileGestaltView.swiftconstvalues",
+    "dependencies" : "/Users/jason/Documents/BQTools/build/DerivedData/Build/Intermediates.noindex/Jade.build/Debug-iphoneos/Jade.build/Objects-normal/arm64/BQMobileGestaltView.d",
+    "diagnostics" : "/Users/jason/Documents/BQTools/build/DerivedData/Build/Intermediates.noindex/Jade.build/Debug-iphoneos/Jade.build/Objects-normal/arm64/BQMobileGestaltView.dia",
+    "object" : "/Users/jason/Documents/BQTools/build/DerivedData/Build/Intermediates.noindex/Jade.build/Debug-iphoneos/Jade.build/Objects-normal/arm64/BQMobileGestaltView.o",
+    "swift-dependencies" : "/Users/jason/Documents/BQTools/build/DerivedData/Build/Intermediates.noindex/Jade.build/Debug-iphoneos/Jade.build/Objects-normal/arm64/BQMobileGestaltView.swiftdeps"
+  }
+}
