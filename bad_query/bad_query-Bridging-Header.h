@@ -3,7 +3,7 @@
 //
 
 #import "bad_query.h"
-
+#import <Foundation/Foundation.h>
 #include <zlib.h>
 #include <stdlib.h>
 
@@ -81,4 +81,40 @@ static inline unsigned char *bq_inflate_raw(const unsigned char *src, size_t src
     inflateEnd(&stream);
     *out_size = total_out;
     return output;
+}
+
+#import <Foundation/Foundation.h>
+#import <objc/message.h>
+#import <objc/runtime.h>
+
+static NSString *AppNameForBundleID(NSString *bundleID) {
+    Class proxyClass = NSClassFromString(@"LSApplicationProxy");
+    if (!proxyClass) {
+        return nil;
+    }
+
+    SEL proxySel = NSSelectorFromString(@"applicationProxyForIdentifier:");
+    if (![proxyClass respondsToSelector:proxySel]) {
+        return nil;
+    }
+
+    id proxy = ((id (*)(id, SEL, NSString *))objc_msgSend)(
+        proxyClass,
+        proxySel,
+        bundleID
+    );
+
+    if (!proxy) {
+        return nil;
+    }
+
+    SEL nameSel = NSSelectorFromString(@"localizedName");
+    if (![proxy respondsToSelector:nameSel]) {
+        return nil;
+    }
+
+    return ((NSString *(*)(id, SEL))objc_msgSend)(
+        proxy,
+        nameSel
+    );
 }

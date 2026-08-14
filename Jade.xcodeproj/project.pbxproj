@@ -6,8 +6,15 @@
 	objectVersion = 110;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		96283B47302EB70B00A04EE6 /* MobileCoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 96283B46302EB70B00A04EE6 /* MobileCoreServices.framework */; };
+		96283B89302EC64F00A04EE6 /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 96283B88302EC64F00A04EE6 /* CoreServices.framework */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		364079F5302A9C1A0028C4A1 /* Jade.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Jade.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		96283B46302EB70B00A04EE6 /* MobileCoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MobileCoreServices.framework; path = System/Library/Frameworks/MobileCoreServices.framework; sourceTree = SDKROOT; };
+		96283B88302EC64F00A04EE6 /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = System/Library/Frameworks/CoreServices.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
@@ -36,6 +43,8 @@
 		3695D2C1302A8A3300D13475 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			files = (
+				96283B47302EB70B00A04EE6 /* MobileCoreServices.framework in Frameworks */,
+				96283B89302EC64F00A04EE6 /* CoreServices.framework in Frameworks */,
 			);
 		};
 /* End PBXFrameworksBuildPhase section */
@@ -46,7 +55,17 @@
 			children = (
 				3695D2C6302A8A3300D13475 /* bad_query */,
 				364079F5302A9C1A0028C4A1 /* Jade.app */,
+				96283B45302EB70B00A04EE6 /* Frameworks */,
 			);
+			sourceTree = "<group>";
+		};
+		96283B45302EB70B00A04EE6 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				96283B88302EC64F00A04EE6 /* CoreServices.framework */,
+				96283B46302EB70B00A04EE6 /* MobileCoreServices.framework */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -255,6 +274,10 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = L7HX85L6GU;
 				ENABLE_PREVIEWS = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/bad_query",
+				);
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = Jade;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
@@ -297,6 +320,10 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = L7HX85L6GU;
 				ENABLE_PREVIEWS = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/bad_query",
+				);
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = Jade;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";

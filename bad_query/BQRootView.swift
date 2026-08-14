@@ -25,6 +25,11 @@ struct BQRootView: View {
         @Bindable var model = model
         return TabView {
             NavigationStack {
+                if let name = appName(for: "com.apple.Preferences") {
+                    Text(name)
+                } else {
+                    Text("Error")
+                }
                 List {
                     Section {
                         ForEach(BQFileSystemModel.quickAccess) { entry in
