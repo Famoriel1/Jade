@@ -27,10 +27,9 @@ struct BQMobileGestaltView: View {
                     }
                 } else {
                     gestaltList
+                        .navigationTitle("MobileGestalt")
                 }
             }
-            .navigationTitle("MobileGestalt")
-            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 if model.loaded {
                     ToolbarItem(placement: .topBarTrailing) {

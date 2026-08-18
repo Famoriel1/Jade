@@ -99,15 +99,10 @@ static inline unsigned char *bq_inflate_raw(const unsigned char *src, size_t src
 #import "CoreServices/LSInstallProgressList.h"
 #import "CoreServices/LSApplicationWorkspace.h"
 
-// 通过 bundleId 获取 App 显示名称
-// 优先级：LSApplicationProxy.localizedName > Info.plist(CFBundleDisplayName/CFBundleName) > nil
-// 文件系统回退扫描 /var/containers/Bundle/Application (UUID/.app 两层)
-// 和 /Applications (扁平结构)，匹配 Info.plist 的 CFBundleIdentifier。
-// MHA 身份下可直接访问；沙盒下由 id2name.swift 的 bad_query 回退兜底。
+
 static NSString *AppNameForBundleID(NSString *bundleId) {
     if (!bundleId.length) return nil;
 
-    // 1. LaunchServices 私有 API 优先（最快、覆盖系统应用）
     Class proxyClass = NSClassFromString(@"LSApplicationProxy");
     if ([proxyClass respondsToSelector:@selector(applicationProxyForIdentifier:)]) {
         id proxy = ((id (*)(id, SEL, NSString *))objc_msgSend)(
@@ -118,33 +113,6 @@ static NSString *AppNameForBundleID(NSString *bundleId) {
             if (name.length) return name;
         }
     }
-
-    // 2. 文件系统回退：扫 /var/containers/Bundle/Application (UUID/.app 两层)
-    //    和 /Applications (扁平结构)，匹配 Info.plist 的 CFBundleIdentifier
-    NSFileManager *fm = [NSFileManager defaultManager];
-    NSArray<NSString *> *roots = @[
-        @"/var/containers/Bundle/Application",
-        @"/Applications"
-    ];
-    for (NSString *root in roots) {
-        BOOL nested = [root hasPrefix:@"/var/containers"];
-        for (NSString *a in [fm contentsOfDirectoryAtPath:root error:nil] ?: @[]) {
-            NSString *dir = nested ? [root stringByAppendingPathComponent:a] : root;
-            for (NSString *item in [fm contentsOfDirectoryAtPath:dir error:nil] ?: @[]) {
-                if (![item hasSuffix:@".app"]) continue;
-                NSString *plist = [[dir stringByAppendingPathComponent:item]
-                    stringByAppendingPathComponent:@"Info.plist"];
-                NSDictionary *info = [NSDictionary dictionaryWithContentsOfFile:plist];
-                if ([info[@"CFBundleIdentifier"] isEqualToString:bundleId]) {
-                    NSString *name = info[@"CFBundleDisplayName"]
-                        ?: info[@"CFBundleName"];
-                    return name.length ? name : nil;
-                }
-            }
-        }
-    }
-
-    // 3. 最终回退（返回 nil，由 Swift 层决定显示 bundleId 或其他）
     return nil;
 }
 

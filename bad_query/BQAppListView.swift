@@ -16,6 +16,7 @@ struct BQAppEntry: Identifiable, Hashable {
 
 struct BQAppListView: View {
     @Environment(BQFileSystemModel.self) private var model
+    @EnvironmentObject private var states: AppState
     @State private var searchText = ""
     @State private var hasLoaded = false
 
@@ -98,7 +99,6 @@ struct BQAppListView: View {
         .listStyle(.plain)
         .searchable(text: $searchText, prompt: "Filter by name or bundle ID")
         .navigationTitle("Apps")
-        .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button {
@@ -115,6 +115,10 @@ struct BQAppListView: View {
         // parses each container's metadata plist — resolve names for any
         // new IDs as they appear.
         .onChange(of: model.items) { _, _ in resolveNames() }
+        .onChange(of: states.referesh_apps) { _, val in
+            val ? loadApps() : ()
+            states.referesh_apps = false
+        }
     }
 
     /// Kick off display-name resolution for any bundle IDs we haven't
@@ -133,46 +137,17 @@ struct BQAppListView: View {
         }
     }
 
-    private func loadApps() {
+    public func loadApps() {
         guard !hasLoaded else { return }
         hasLoaded = true
 
         if model.useMHAHelper {
             loadAppsViaMHA()
         } else {
-            // MHA 关闭：bad_query inode scan 发现 + bad_query 访问
             model.load(Self.appRoot, allowMHA: false)
         }
     }
 
-    /// MHA 开启时的 app 发现与访问。
-    ///
-    /// 参考：
-    /// - SandboxEscape-Usage-Manual.md §7 (iOS 26 app discovery)
-    /// - AppsManager-Fix-Report.md §3 (3-hook fallback strategy)
-    /// - AppsManager-Fix-Report.md §6.2 Hook 2 field 2 (display name resolution)
-    ///
-    /// 三级发现策略（按优先级）：
-    /// 1. csstore 解析 — 激活 com.apple.lsd class-10 容器，解析
-    ///    com.apple.LaunchServices-*-v2.csstore 提取候选 bundle ID。
-    ///    iOS 26 上 MCMEnumerateIdentifiersForClass 返回近空，csstore 是主要方案。
-    /// 2. MCMEnumerateIdentifiersForClass(2) — 直接枚举 class-2 容器标识符。
-    ///    iOS 26 通常近空，但可能补充 csstore 未覆盖的系统应用。
-    /// 3. inode scan 回退 — bad_query 扫 /var/mobile/Containers/Data/Application。
-    ///    当 csstore + enum 结果太少时回退到此 proven route。
-    ///
-    /// 对每个 bundle ID 用 BQMCMDataContainerPathQuery（仅查路径，不激活 token）
-    /// 解析 data container 路径。实际 sandbox extension 在用户点击进入容器时
-    /// 由 ensureMHAExtension 按需激活。
-    ///
-    /// 显示名解析（AppsManager-Fix-Report.md Hook 2 field 2 三级回退）：
-    ///   LSApplicationProxy.localizedName → MCM metadata plist → bundleId
-    /// MHA 身份下 LSApplicationProxy 可用（per project memory）。
-    /// bundle 目录的 Info.plist 不可读（Manual §10.2），改用 data container 的
-    /// .com.apple.mobile_container_manager.metadata.plist 中的 MCMMetadataDisplayName。
-    ///
-    /// 注意：不扫描 /var/containers/Bundle/Application — MCM 不签发该路径的
-    /// extension（SandboxEscape-Usage-Manual.md §10.2）。
     private func loadAppsViaMHA() {
         model.isLoading = true
         model.lastError = nil

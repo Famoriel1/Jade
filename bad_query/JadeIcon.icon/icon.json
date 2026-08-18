@@ -99,13 +99,21 @@
       }
     },
     {
-      "blur-material" : 0.1,
+      "blur-material-specializations" : [
+        {
+          "value" : 0.1
+        },
+        {
+          "appearance" : "light",
+          "value" : null
+        }
+      ],
       "layers" : [
         {
           "fill-specializations" : [
             {
               "value" : {
-                "solid" : "srgb:0.52993,1.00000,0.71761,1.00000"
+                "automatic-gradient" : "srgb:0.52993,1.00000,0.71761,1.00000"
               }
             },
             {
@@ -159,7 +167,7 @@
       "layers" : [
         {
           "fill" : "automatic",
-          "glass" : false,
+          "glass" : true,
           "image-name" : "HEIF图像.heic",
           "name" : "HEIF图像",
           "position" : {

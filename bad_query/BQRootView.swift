@@ -18,12 +18,13 @@ func openURL(_ urlString: String) {
 
 struct BQRootView: View {
     @State private var model = BQFileSystemModel()
-    @State private var showingLog = false
+    @State private var root_selection: Int = 0
+    @State private var apps_selection: Int = 0
     @EnvironmentObject var state: AppState
     
     var body: some View {
         @Bindable var model = model
-        return TabView {
+        TabView(selection: $root_selection) {
             NavigationStack {
                 List {
                     Section {
@@ -41,54 +42,11 @@ struct BQRootView: View {
                             }
                         }
                     } header: {
-                        Text("File browsing")
+                        Text("Quick Paths")
                     } footer: {
                         Text("iOS 26 needs the App Group sacrifice route for App Groups; iOS 27 reaches System containers directly.")
                     }
                     
-                    Section("Session") {
-                        HStack {
-                            Label("Active Extensions", systemImage: "key.fill")
-                            Spacer()
-                            Text("\(model.extensionCount)")
-                                .foregroundStyle(.secondary)
-                                .monospacedDigit()
-                        }
-                        if BQFileSystemModel.isMobileHouseArrest {
-                            Toggle(isOn: $model.useMHAHelper) {
-                                Label("Use MobileHouseArrest", systemImage: "lock.open")
-                            }
-                            .onChange(of: model.useMHAHelper) { _, _ in
-                                model.appendLog("MHA helper \(model.useMHAHelper ? "enabled" : "disabled")")
-                            }
-                        }
-                        Button {
-                            showingLog = true
-                        } label: {
-                            Label("Activity Log", systemImage: "text.alignleft")
-                        }
-                        Button {
-                            model.releaseAllExtensions()
-                        } label: {
-                            Label("Release All Extensions", systemImage: "xmark.shield")
-                        }
-                        .disabled(model.extensionCount == 0)
-                        Button {
-                            openURL("https://www.icloud.com/shortcuts/b402f010cf264d2c987db5b3e3bcc526")
-                        } label: {
-                            Label("Get Reboot Shortcut", systemImage: "square.and.arrow.down")
-                        }
-                        Button {
-                            state.respring()
-                        } label: {
-                            Label("Respring", systemImage: "arrow.clockwise")
-                        }
-                        Button {
-                            openURL("shortcuts://run-shortcut?name=reboot")
-                        } label: {
-                            Label("Reboot", systemImage: "power")
-                        }
-                    }
                     
                     if let error = model.lastError {
                         Section {
@@ -99,32 +57,35 @@ struct BQRootView: View {
                         }
                     }
                 }
-                .navigationTitle("Jade")
-                .overlay(alignment: .bottom) {
-                    if !model.statusMessage.isEmpty {
-                        Text(model.statusMessage)
-                            .font(.caption)
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 6)
-                            .background(.regularMaterial, in: Capsule())
-                            .padding(.bottom, 8)
-                            .lineLimit(1)
-                    }
-                }
-                .sheet(isPresented: $showingLog) {
-                    BQLogView()
-                }
+                .navigationTitle("File")
+
             }
             .tabItem {
                 Label("File", systemImage: "folder")
             }
+            .tag(0)
             
-            NavigationStack {
-                BQAppListView()
+            TabView(selection: $apps_selection) {
+                NavigationStack {
+                    BQAppListView()
+                }
+                .tabItem {
+                    Text("Apps")
+                }
+                .tag(0)
+                
+                NavigationStack {
+                    BQAppGroupListView()
+                }
+                .tabItem {
+                    Text("App Groups")
+                }
+                .tag(1)
             }
             .tabItem {
                 Label("Apps", systemImage: "app.grid")
             }
+            .tag(1)
             
             NavigationStack {
                 BQMobileGestaltView()
@@ -132,14 +93,48 @@ struct BQRootView: View {
             .tabItem {
                 Label("Gestalt", systemImage: "apps.iphone")
             }
+            .tag(2)
+            
             NavigationStack {
                 BQPosterView()
             }
             .tabItem {
                 Label("Poster", systemImage: "photo.on.rectangle.angled")
             }
+            .tag(3)
+            
+            NavigationStack {
+                BQSettingsView()
+            }
+            
+            .tabItem {
+                Label("Settings", systemImage: "gearshape")
+            }
+            .tag(4)
         }
         .environment(model)
+        .environmentObject(state)
+        .overlay(alignment: .bottom) {
+            if !model.statusMessage.isEmpty {
+                Text(model.statusMessage)
+                    .font(.caption)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 6)
+                    .background(.regularMaterial, in: Capsule())
+                    .padding(.bottom, 8)
+                    .lineLimit(1)
+            }
+        }
+        .onChange(of: root_selection) { _, val in
+            if val == 1 {
+                state.referesh_apps = true
+                state.referesh_appgs = true
+            }
+        }
+        .sheet(isPresented: $state.show_log) {
+            BQLogView()
+                .environment(model)
+        }
     }
 }
 

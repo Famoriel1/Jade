@@ -526,7 +526,7 @@ final class BQFileSystemModel {
 
         // Full scan: no cache, no adaptive range. Split into two phases so
         // partial results appear quickly.
-        let quickMax: Int64 = min(10_000, maxInode)
+        let quickMax: Int64 = min(20_000, maxInode)
         let quickPaths = await scanInodeRange(path: path, start: 1, end: quickMax)
 
         if !quickPaths.isEmpty {
@@ -599,7 +599,7 @@ final class BQFileSystemModel {
     /// a stateless syscall, so concurrent bad_query_list_range calls are safe.
     private func scanInodeRange(path: String, start: Int64, end: Int64) async -> [String] {
         if start > end { return [] }
-        let chunkSize: Int64 = 8192
+        let chunkSize: Int64 = 4096
         let chunks: [(Int64, Int64)] = stride(from: start, through: end, by: Int(chunkSize)).map {
             s in (s, min(s + chunkSize - 1, end))
         }

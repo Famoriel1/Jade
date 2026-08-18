@@ -59,7 +59,7 @@ struct BQPosterView: View {
                 Button {
                     showBrowser = true
                 } label: {
-                    Label("Browse Wallpapers", systemImage: "photo.grid")
+                    Label("Browse Wallpapers", systemImage: "photo.stack.fill")
                 }
                 .disabled(busy)
             } footer: {
