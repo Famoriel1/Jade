@@ -81,6 +81,7 @@ jobs:
           ls -la "$APP_PATH"
 
       - name: Create IPA
+        shell: bash
         run: |
           set -e
 
@@ -106,13 +107,13 @@ jobs:
           find Payload -maxdepth 2 -print
 
           echo ""
-          echo "===== Creating Jade.ipa ====="
+          echo "===== Creating IPA ====="
 
-          cd Payload
+          # IMPORTANT:
+          # Run zip from the directory containing Payload.
+          # This makes the IPA contain Payload/Jade.app.
 
-          zip -r -X ../Jade.ipa Jade.app
-
-          cd ..
+          zip -r -X Jade.ipa Payload/Jade.app
 
           echo ""
           echo "===== IPA created ====="
@@ -137,7 +138,8 @@ jobs:
             exit 1
           fi
 
-          echo "IPA structure looks correct."
+          echo ""
+          echo "IPA structure is correct."
 
       - name: Upload IPA
         uses: actions/upload-artifact@v4
