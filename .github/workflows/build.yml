@@ -7,73 +7,36 @@ on:
       - main
 
 jobs:
-  inspect:
-    name: Inspect Jade Project
+  build:
+    name: Build Jade with Xcode 27
     runs-on: macos-26
 
     steps:
       - name: Checkout Jade
         uses: actions/checkout@v4
 
-      - name: List installed Xcodes
+      - name: Select Xcode 27
         run: |
-          echo "Installed Xcode versions:"
-          ls -la /Applications | grep Xcode || true
+          sudo xcode-select -s /Applications/Xcode_27_beta_4.app/Contents/Developer
 
-      - name: Show current Xcode
+      - name: Verify Xcode
         run: |
-          echo "Xcode version:"
-          xcodebuild -version
-
-          echo ""
           echo "Developer directory:"
           xcode-select -p
 
-      - name: Inspect project format
-        run: |
-          echo "===== Project format information ====="
-
-          if [ -f "Jade.xcodeproj/project.pbxproj" ]; then
-            grep -E 'objectVersion|compatibilityVersion|LastUpgradeCheck' \
-              Jade.xcodeproj/project.pbxproj | head -20
-          else
-            echo "ERROR: Jade.xcodeproj/project.pbxproj was not found"
-            exit 1
-          fi
-
           echo ""
-          echo "===== First 20 lines of project.pbxproj ====="
-          head -20 Jade.xcodeproj/project.pbxproj
-
-          echo ""
-          echo "===== Git commit ====="
-          git log -1 --oneline
-
-      - name: Try to list Xcode project
-        run: |
-          xcodebuild \
-            -list \
-            -project Jade.xcodeproj
-
-  build:
-    name: Build Jade
-    needs: inspect
-    runs-on: macos-26
-
-    steps:
-      - name: Checkout Jade
-        uses: actions/checkout@v4
-
-      - name: Show Xcode version
-        run: |
+          echo "Xcode version:"
           xcodebuild -version
-          xcode-select -p
 
-      - name: List project schemes
+      - name: Inspect Jade project
         run: |
-          xcodebuild \
-            -list \
-            -project Jade.xcodeproj
+          echo "===== Project format ====="
+          grep -E 'objectVersion|LastUpgradeCheck' \
+            Jade.xcodeproj/project.pbxproj
+
+          echo ""
+          echo "===== Xcode project ====="
+          xcodebuild -list -project Jade.xcodeproj
 
       - name: Build Jade
         run: |
@@ -89,9 +52,9 @@ jobs:
       - name: Check build output
         run: |
           echo "===== Build products ====="
-          find build/Build/Products -maxdepth 2 -type d -print
+          find build/Build/Products -maxdepth 3 -print
 
-      - name: Package IPA
+      - name: Create IPA
         run: |
           set -e
 
@@ -99,21 +62,18 @@ jobs:
 
           if [ ! -d "$APP_PATH" ]; then
             echo "ERROR: Jade.app was not found."
-            echo ""
-            echo "Available build products:"
             find build/Build/Products -maxdepth 3 -print || true
             exit 1
           fi
 
           rm -rf Payload
           mkdir Payload
-
           cp -R "$APP_PATH" Payload/Jade.app
 
           zip -r Jade.ipa Payload
 
           echo ""
-          echo "IPA created:"
+          echo "===== IPA ====="
           ls -lh Jade.ipa
 
       - name: Upload IPA
