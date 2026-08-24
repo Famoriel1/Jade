@@ -8,38 +8,111 @@ on:
 
 jobs:
   build:
-    name: Build Jade with Xcode 27
+    name: Build Jade
     runs-on: macos-26
 
     steps:
       - name: Checkout Jade
         uses: actions/checkout@v4
 
-      - name: Select Xcode 27
+      - name: Find and select Xcode 27
+        shell: bash
         run: |
-          sudo xcode-select -s /Applications/Xcode_27_beta_4.app/Contents/Developer
+          set -e
 
-      - name: Verify Xcode
-        run: |
-          echo "Developer directory:"
+          echo "===== Xcode applications installed on runner ====="
+
+          find /Applications \
+            -maxdepth 1 \
+            -type d \
+            -name 'Xcode*.app' \
+            -print | sort
+
+          echo ""
+          echo "===== Detecting Xcode versions ====="
+
+          XCODE_27=""
+
+          for app in /Applications/Xcode*.app; do
+            if [ -d "$app/Contents/Developer" ]; then
+
+              VERSION=$(
+                "$app/Contents/Developer/usr/bin/xcodebuild" -version 2>/dev/null \
+                | head -n 1 \
+                | sed 's/^Xcode //'
+              )
+
+              echo "$app -> Xcode $VERSION"
+
+              case "$VERSION" in
+                27.*)
+                  XCODE_27="$app"
+                  ;;
+              esac
+            fi
+          done
+
+          echo ""
+
+          if [ -z "$XCODE_27" ]; then
+            echo "ERROR: Xcode 27 was not found on this runner."
+            echo ""
+            echo "Available Xcodes were listed above."
+            exit 1
+          fi
+
+          echo "===== Selecting Xcode 27 ====="
+          echo "Selected application: $XCODE_27"
+
+          sudo xcode-select -s "$XCODE_27/Contents/Developer"
+
+          echo ""
+          echo "===== Selected developer directory ====="
           xcode-select -p
 
           echo ""
-          echo "Xcode version:"
+          echo "===== Selected Xcode ====="
           xcodebuild -version
 
       - name: Inspect Jade project
+        shell: bash
         run: |
+          set -e
+
           echo "===== Project format ====="
+
+          if [ ! -f "Jade.xcodeproj/project.pbxproj" ]; then
+            echo "ERROR: Jade.xcodeproj/project.pbxproj was not found."
+            exit 1
+          fi
+
           grep -E 'objectVersion|LastUpgradeCheck' \
-            Jade.xcodeproj/project.pbxproj
+            Jade.xcodeproj/project.pbxproj || true
 
           echo ""
-          echo "===== Xcode project ====="
-          xcodebuild -list -project Jade.xcodeproj
+          echo "===== First 20 lines of project.pbxproj ====="
+
+          head -20 Jade.xcodeproj/project.pbxproj
+
+          echo ""
+          echo "===== Xcode project information ====="
+
+          xcodebuild \
+            -list \
+            -project Jade.xcodeproj
+
+      - name: Show available schemes
+        shell: bash
+        run: |
+          xcodebuild \
+            -list \
+            -project Jade.xcodeproj
 
       - name: Build Jade
+        shell: bash
         run: |
+          set -o pipefail
+
           xcodebuild \
             -project Jade.xcodeproj \
             -scheme Jade \
@@ -49,31 +122,57 @@ jobs:
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO
 
-      - name: Check build output
+      - name: Check build products
+        shell: bash
         run: |
           echo "===== Build products ====="
-          find build/Build/Products -maxdepth 3 -print
 
-      - name: Create IPA
+          if [ -d "build/Build/Products" ]; then
+            find build/Build/Products \
+              -maxdepth 3 \
+              -print
+          else
+            echo "ERROR: Build products directory was not created."
+            exit 1
+          fi
+
+      - name: Create unsigned IPA
+        shell: bash
         run: |
           set -e
 
           APP_PATH="build/Build/Products/Release-iphoneos/Jade.app"
 
+          echo "Looking for:"
+          echo "$APP_PATH"
+
           if [ ! -d "$APP_PATH" ]; then
+            echo ""
             echo "ERROR: Jade.app was not found."
-            find build/Build/Products -maxdepth 3 -print || true
+            echo ""
+            echo "Available files:"
+            find build/Build/Products \
+              -maxdepth 4 \
+              -print || true
             exit 1
           fi
 
+          echo ""
+          echo "Found Jade.app"
+
           rm -rf Payload
-          mkdir Payload
+          mkdir -p Payload
+
           cp -R "$APP_PATH" Payload/Jade.app
 
-          zip -r Jade.ipa Payload
+          rm -f Jade.ipa
+
+          cd Payload
+          zip -r ../Jade.ipa Jade.app
+          cd ..
 
           echo ""
-          echo "===== IPA ====="
+          echo "===== IPA created ====="
           ls -lh Jade.ipa
 
       - name: Upload IPA
