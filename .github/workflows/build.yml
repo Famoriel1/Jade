@@ -8,18 +8,22 @@ on:
 
 jobs:
   build:
-    runs-on: macos-15
+    runs-on: macos-26
 
     steps:
       - name: Checkout Jade
         uses: actions/checkout@v4
 
-      - name: Show Xcode version
+      - name: List installed Xcodes
+        run: |
+          ls -la /Applications | grep Xcode || true
+
+      - name: Show current Xcode
         run: |
           xcodebuild -version
           xcode-select -p
 
-      - name: List Xcode schemes
+      - name: List project
         run: |
           xcodebuild -list -project Jade.xcodeproj
 
@@ -39,7 +43,6 @@ jobs:
           mkdir -p Payload
           cp -R build/Build/Products/Release-iphoneos/Jade.app Payload/
           zip -r Jade.ipa Payload
-          rm -rf Payload
 
       - name: Upload IPA
         uses: actions/upload-artifact@v4
