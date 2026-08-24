@@ -59,13 +59,28 @@ jobs:
 
       - name: Check build output
         run: |
+          set -e
+
           echo "===== Build products ====="
 
           find build/Build/Products \
             -maxdepth 3 \
             -print
 
-      - name: Create unsigned IPA
+          echo ""
+          echo "===== Checking Jade.app ====="
+
+          APP_PATH="build/Build/Products/Release-iphoneos/Jade.app"
+
+          if [ ! -d "$APP_PATH" ]; then
+            echo "ERROR: Jade.app was not found."
+            exit 1
+          fi
+
+          echo "Jade.app found:"
+          ls -la "$APP_PATH"
+
+      - name: Create IPA
         run: |
           set -e
 
@@ -73,30 +88,56 @@ jobs:
 
           if [ ! -d "$APP_PATH" ]; then
             echo "ERROR: Jade.app was not found."
-            echo ""
-            echo "Available build products:"
-            find build/Build/Products \
-              -maxdepth 4 \
-              -print || true
             exit 1
           fi
 
-          echo "Found Jade.app"
+          echo "===== Preparing IPA ====="
 
           rm -rf Payload
+          rm -f Jade.ipa
+
           mkdir -p Payload
 
           cp -R "$APP_PATH" Payload/Jade.app
 
-          rm -f Jade.ipa
+          echo ""
+          echo "===== IPA directory structure ====="
+
+          find Payload -maxdepth 2 -print
+
+          echo ""
+          echo "===== Creating Jade.ipa ====="
 
           cd Payload
-          zip -r ../Jade.ipa Jade.app
+
+          zip -r -X ../Jade.ipa Jade.app
+
           cd ..
 
           echo ""
           echo "===== IPA created ====="
+
           ls -lh Jade.ipa
+
+          echo ""
+          echo "===== IPA contents ====="
+
+          unzip -l Jade.ipa
+
+          echo ""
+          echo "===== Verifying IPA structure ====="
+
+          if ! unzip -l Jade.ipa | grep -q "Payload/Jade.app/"; then
+            echo "ERROR: IPA does not contain Payload/Jade.app/"
+            exit 1
+          fi
+
+          if ! unzip -l Jade.ipa | grep -q "Payload/Jade.app/Info.plist"; then
+            echo "ERROR: IPA does not contain Jade.app/Info.plist"
+            exit 1
+          fi
+
+          echo "IPA structure looks correct."
 
       - name: Upload IPA
         uses: actions/upload-artifact@v4
