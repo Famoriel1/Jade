@@ -875,7 +875,177 @@ final class BQFileSystemModel {
             lastError = error.localizedDescription
         }
     }
+// MARK: Recursive Mirror
 
+func mirrorEverything(from sourcePath: String) {
+    guard !sourcePath.isEmpty else {
+        lastError = "No source directory selected."
+        return
+    }
+
+    let documents = FileManager.default.urls(
+        for: .documentDirectory,
+        in: .userDomainMask
+    )[0]
+
+    let mirrorRoot = documents.appendingPathComponent(
+        "Mirror",
+        isDirectory: true
+    )
+
+    let sourceName = (sourcePath as NSString).lastPathComponent
+    let destinationRoot = mirrorRoot.appendingPathComponent(
+        sourceName,
+        isDirectory: true
+    )
+
+    do {
+        try FileManager.default.createDirectory(
+            at: mirrorRoot,
+            withIntermediateDirectories: true
+        )
+
+        if FileManager.default.fileExists(
+            atPath: destinationRoot.path
+        ) {
+            try FileManager.default.removeItem(
+                at: destinationRoot
+            )
+        }
+
+        try FileManager.default.createDirectory(
+            at: destinationRoot,
+            withIntermediateDirectories: true
+        )
+
+        var copiedFiles = 0
+        var copiedDirectories = 0
+        var skipped = 0
+
+        mirrorDirectory(
+            source: sourcePath,
+            destination: destinationRoot.path,
+            copiedFiles: &copiedFiles,
+            copiedDirectories: &copiedDirectories,
+            skipped: &skipped
+        )
+
+        statusMessage =
+            "Mirror complete: \(copiedFiles) files, " +
+            "\(copiedDirectories) folders, \(skipped) skipped"
+
+        appendLog(
+            "mirror complete: \(copiedFiles) files, " +
+            "\(copiedDirectories) folders, \(skipped) skipped"
+        )
+
+    } catch {
+        lastError = "Mirror failed: \(error.localizedDescription)"
+    }
+}
+
+private func mirrorDirectory(
+    source: String,
+    destination: String,
+    copiedFiles: inout Int,
+    copiedDirectories: inout Int,
+    skipped: inout Int
+) {
+    // Use Jade's existing access mechanism.
+    let handle = ensureExtension(for: source)
+
+    guard handle > 0 || FileManager.default.fileExists(atPath: source) else {
+        skipped += 1
+        appendLog("mirror: no access to \(source)")
+        return
+    }
+
+    let entries: [String]
+
+    do {
+        // No hidden-file filtering.
+        entries = try FileManager.default.contentsOfDirectory(
+            atPath: source
+        )
+    } catch {
+        skipped += 1
+        appendLog(
+            "mirror: cannot enumerate \(source): \(error.localizedDescription)"
+        )
+        return
+    }
+
+    for name in entries {
+        let sourceItem = (source as NSString)
+            .appendingPathComponent(name)
+
+        let destinationItem = (destination as NSString)
+            .appendingPathComponent(name)
+
+        // Get access to this exact path using Jade's existing mechanism.
+        let itemHandle = ensureExtension(for: sourceItem)
+
+        guard itemHandle > 0 ||
+              FileManager.default.fileExists(atPath: sourceItem) else {
+            skipped += 1
+            appendLog("mirror: no access to \(sourceItem)")
+            continue
+        }
+
+        var isDirectory: ObjCBool = false
+
+        guard FileManager.default.fileExists(
+            atPath: sourceItem,
+            isDirectory: &isDirectory
+        ) else {
+            skipped += 1
+            continue
+        }
+
+        do {
+            if isDirectory.boolValue {
+                try FileManager.default.createDirectory(
+                    at: URL(fileURLWithPath: destinationItem),
+                    withIntermediateDirectories: true
+                )
+
+                copiedDirectories += 1
+
+                mirrorDirectory(
+                    source: sourceItem,
+                    destination: destinationItem,
+                    copiedFiles: &copiedFiles,
+                    copiedDirectories: &copiedDirectories,
+                    skipped: &skipped
+                )
+
+            } else {
+                let parent = (destinationItem as NSString)
+                    .deletingLastPathComponent
+
+                try FileManager.default.createDirectory(
+                    atPath: parent,
+                    withIntermediateDirectories: true
+                )
+
+                try FileManager.default.copyItem(
+                    atPath: sourceItem,
+                    toPath: destinationItem
+                )
+
+                copiedFiles += 1
+            }
+
+        } catch {
+            skipped += 1
+
+            appendLog(
+                "mirror: failed \(sourceItem): " +
+                "\(error.localizedDescription)"
+            )
+        }
+    }
+}
     // MARK: In-place Write
 
     /// Write data to a file in-place using fd overwrite, preserving the inode.

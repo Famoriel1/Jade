@@ -191,10 +191,17 @@ struct BQDirectoryView: View {
                 Button { showingNewItem = true; newItemIsDirectory = false } label: {
                     Label("New File", systemImage: "doc.badge.plus")
                 }
-                Button { showingImportTarget = true } label: {
-                    Label("Import File Here", systemImage: "square.and.arrow.down")
-                }
-                Divider()
+				Button { showingImportTarget = true } label: {
+					Label("Import File Here", systemImage: "square.and.arrow.down")
+				}
+
+				Button {
+					model.mirrorEverything(from: path)
+				} label: {
+					Label("Mirror Everything", systemImage: "arrow.triangle.2.circlepath")
+				}
+				
+				Divider()
                 if model.copiedItemPath != nil {
                     Button { model.paste(into: path) } label: {
                         Label("Paste Here", systemImage: "doc.on.doc")
