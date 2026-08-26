@@ -951,14 +951,10 @@ private func mirrorDirectory(
     copiedDirectories: inout Int,
     skipped: inout Int
 ) {
-    // Use Jade's existing access mechanism.
-    let handle = ensureExtension(for: source)
-
-    guard handle > 0 || FileManager.default.fileExists(atPath: source) else {
-        skipped += 1
-        appendLog("mirror: no access to \(source)")
-        return
-    }
+// Jade may already have access to this directory through the
+// existing bad_query/MHA mechanism. Do not require a new extension
+// for the directory itself before attempting enumeration.
+_ = ensureExtension(for: source)
 
     let entries: [String]
 
